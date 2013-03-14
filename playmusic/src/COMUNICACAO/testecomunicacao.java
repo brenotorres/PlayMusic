@@ -15,7 +15,7 @@ public class testecomunicacao {
 	
 	
 	
-	//Testando Testando Som Som Ei Ei Ah Ah 1 2 1 2 
-	//deixa eu ver q negocim é
-	//Testando Testando Som Som Ei Ei Ah Ah 1 2 1 2 
+	//lewisqueimatoba
+	//biscoitos
+	//manteiga
 }

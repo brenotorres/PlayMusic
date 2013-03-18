@@ -137,14 +137,14 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 						while(state == PAUSED){System.out.println("esperando");}
 					}
 					// Stop
-					//if (line != null){
-						//state = UNKNOWN;
-						//line.drain();
-						//line.stop();
-						//line.close();
-						//line = null;
-						//closeStream();
-					//}
+					if (line != null && state != STOPPED){
+						state = UNKNOWN;
+						line.drain();
+						line.stop();
+						line.close();
+						line = null;
+						closeStream();
+					}
 				}
 			}
 		} catch (LineUnavailableException e) {

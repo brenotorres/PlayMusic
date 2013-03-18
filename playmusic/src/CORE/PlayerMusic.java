@@ -17,7 +17,7 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	private SourceDataLine line;
 	private File dataSource;
 	private Thread thread;
-
+	
 	public boolean erro = false;
 
 	public static final int UNKNOWN = -1;

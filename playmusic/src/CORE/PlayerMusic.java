@@ -49,7 +49,6 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 				if (audioin != null){
 					audioin.close();
 					audioin = null;
-					System.out.println("Entrou aqui?");
 				}
 			}
 		} catch (IOException e) {
@@ -79,13 +78,9 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	protected void stopMusic(){
 		if (state == PLAYING || state == PAUSED){
 			if (line != null){
-				System.out.println("PAREEE");
 				state = STOPPED;
 				line.stop();
 				line.flush();
-				line.drain();
-				line.close();
-				line = null;
 				closeStream();
 			}
 		}
@@ -134,10 +129,10 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 						if (nBytesRead != -1){
 							nBytesWritten = line.write(data, 0, nBytesRead);
 						}
-						while(state == PAUSED){System.out.println("esperando");}
+						while(state == PAUSED){}
 					}
 					// Stop
-					if (line != null && state != STOPPED){
+					if (line != null){
 						state = UNKNOWN;
 						line.drain();
 						line.stop();
@@ -156,7 +151,6 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 
 	public void play(File file) {
 		if (state == PAUSED){
-			System.out.println("certo");
 			resumeMusic();
 		}else{
 			open(file);

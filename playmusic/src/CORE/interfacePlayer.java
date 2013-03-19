@@ -9,5 +9,5 @@ public interface interfacePlayer {
     void pause();
     
     void stop();
-
+    
 }

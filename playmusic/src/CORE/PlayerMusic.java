@@ -23,7 +23,9 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	private Thread thread;
 	private AudioFileFormat baseFileFormat = null;
 	private AudioFormat baseFormat = null;
-	private String author = "", title = "", album = ""; 
+	private String author;
+	private String title;
+	private String album; 
 
 	
 	public boolean erro = false;

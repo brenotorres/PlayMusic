@@ -2,6 +2,9 @@ package CORE;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+
+import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -10,6 +13,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+
 public class PlayerMusic implements interfacePlayer, Runnable{
 	private AudioFormat format;
 	private AudioFormat decodedFormat;
@@ -17,6 +21,10 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	private SourceDataLine line;
 	private File dataSource;
 	private Thread thread;
+	private AudioFileFormat baseFileFormat = null;
+	private AudioFormat baseFormat = null;
+	private String author = "", title = "", album = ""; 
+
 	
 	public boolean erro = false;
 
@@ -97,6 +105,7 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 			if (audioin != null){
 				closeStream();
 			}
+			prop(file);
 			audioin = AudioSystem.getAudioInputStream(dataSource);
 			if (audioin != null){
 				format = audioin.getFormat();
@@ -165,4 +174,31 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	public void pause() {
 		pauseMusic();
 	}
+	
+	protected void prop(File file) throws UnsupportedAudioFileException, IOException {
+		baseFileFormat = AudioSystem.getAudioFileFormat(file);
+		baseFormat = baseFileFormat.getFormat();
+		Map properties = ((AudioFileFormat)baseFileFormat).properties();
+		
+		String key = "author";
+		author = (String) properties.get(key);
+		key = "title";
+		title = (String) properties.get(key);
+		key = "album";
+		album = (String) properties.get(key);
+	}
+
+	public String get_album() {
+		return album;
+	}
+
+	public String get_title() {
+		return title;
+	}
+
+	public String get_author() {
+		return author;
+	}
+
+	
 }

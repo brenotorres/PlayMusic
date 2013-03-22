@@ -10,4 +10,10 @@ public interface interfacePlayer {
     
     void stop();
     
+    String get_album();
+    
+    String get_title();
+    
+    String get_author();
+    
 }

@@ -11,12 +11,12 @@ public class main {
         BufferedReader b = new BufferedReader(new InputStreamReader(System.in));
         interfacePlayer i = new PlayerMusic();
         try{
-	        File file = new File("123.mp3");
+	        File file = new File("manguetown.mp3");
 	        i.play(file);
 	        System.out.println(i.get_album()+i.get_author()+i.get_title());
 	        while (true){
 	        	b.readLine();
-	        	i.stop();
+	        	i.seek(60);
 	        	b.readLine();
 	        	i.play(file);
 	        }

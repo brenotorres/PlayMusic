@@ -27,13 +27,14 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	private String title;
 	private String album; 
 
-	
+
 	public boolean erro = false;
 
 	public static final int UNKNOWN = -1;
 	public static final int PLAYING = 0;
 	public static final int PAUSED = 1;
 	public static final int STOPPED = 2;
+	public static final int SEEKING = 3;
 	private int state = UNKNOWN;
 
 	public PlayerMusic(){
@@ -123,6 +124,26 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 		}
 	}
 
+	protected void skip(long bytes){
+		try {
+			int pState = state;
+			state = SEEKING;
+			long total = 0;
+			long skipped;
+			boolean sair = false;
+			while (total < bytes && !sair){
+				skipped = audioin.skip(bytes - total);
+				if (skipped == 0){
+					sair = true;
+				}
+				total = total + skipped;
+			}
+			state = pState;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void run() {
 		try {
 			synchronized (audioin){
@@ -140,7 +161,7 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 						if (nBytesRead != -1){
 							nBytesWritten = line.write(data, 0, nBytesRead);
 						}
-						while(state == PAUSED){}
+						while(state == PAUSED || state == SEEKING){System.out.println("espera");}
 					}
 					// Stop
 					if (line != null){
@@ -176,12 +197,12 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	public void pause() {
 		pauseMusic();
 	}
-	
+
 	protected void prop(File file) throws UnsupportedAudioFileException, IOException {
 		baseFileFormat = AudioSystem.getAudioFileFormat(file);
 		baseFormat = baseFileFormat.getFormat();
 		Map properties = ((AudioFileFormat)baseFileFormat).properties();
-		
+
 		String key = "author";
 		author = (String) properties.get(key);
 		key = "title";
@@ -202,5 +223,9 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 		return author;
 	}
 
-	
+	public void seek(int sec){
+		long skip = (int)decodedFormat.getFrameSize() * (int)decodedFormat.getFrameRate() * sec;
+		skip(skip);
+	}
+
 }

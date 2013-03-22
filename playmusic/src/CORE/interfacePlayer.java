@@ -10,11 +10,12 @@ public interface interfacePlayer {
     
     void stop();
     
+    void seek(int sec);
+    
     String get_album();
     
     String get_title();
     
     String get_author();
-    //teste
     
 }

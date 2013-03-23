@@ -13,6 +13,7 @@ public class SRserver {
 	//declarações
 	byte[] buffer = new byte[1000];
 	byte[] pacote = new byte[1003];
+	public static int DEBUG = 1;
 	public static DatagramSocket clientSocket;
 	public static SortedSet<Short> semACK = new TreeSet<Short>();
 	public static TreeMap <Short,DatagramPacket> pacotes = new TreeMap<Short,DatagramPacket>();
@@ -40,7 +41,7 @@ public class SRserver {
 				if(numerolido != 1000){ //o metodo fis.read tambem retorna a quantidade de bytes lidos.
 					pacote[1003]=1;
 				}else{
-					pacote[1003]=0;
+					pacote[1003]=0;//esse espaço vai ser reservado para saber se é o ultimo pacote ou não.
 				}
 				
 				

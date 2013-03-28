@@ -24,7 +24,7 @@ public class SRserver {
 	
 	
 	
-	public void criarPacote(FileInputStream fis,InetAddress IPAddress,int port){
+	public void criarPacote(FileInputStream fis,InetAddress IPAddress,int port, int ackPort){
 		
 		try {
 			int numerolido = fis.read(buffer);//lê do arquivo (fis) e salva no buffer
@@ -53,6 +53,32 @@ public class SRserver {
 				
 				buffer = new byte[1000];//limpando
 				pacote = new byte[1003];//limpando
+				
+				
+				Thread ackThread = new Thread(new ackThread(ackPort, pacotes.lastKey(), timeout));
+		        ackThread.start();
+		        ackThread.setPriority(Thread.MAX_PRIORITY-1);
+		        
+		        
+		        
+		        base = 1;
+				short proximo = 1;
+				
+				while(esperar){
+					
+					while(proximo<base+janela){
+						if(pacotes.get(proximo)!=null){
+							try {
+								clientSocket.send(pacotes.get(proximo));
+								
+								
+							} catch (IOException e) {}
+							
+						}
+					}
+					
+				}
+				
 			}
 		} catch (IOException e) {}
 		
@@ -63,32 +89,13 @@ public class SRserver {
 		
 		
 		
-		Thread ackThread = new Thread(new ackThread(ackPort, pacotes.lastKey(), timeout));
-        ackThread.start();
-        ackThread.setPriority(Thread.MAX_PRIORITY-1);
+
 	
 		
 	}
 	
 	public void janelaDeslizante(){
 		
-		base = 1;
-		short proximo = 1;
-		
-		while(esperar){
-			
-			while(proximo<base+janela){
-				if(pacotes.get(proximo)!=null){
-					try {
-						clientSocket.send(pacotes.get(proximo));
-						
-						
-					} catch (IOException e) {}
-					
-				}
-			}
-			
-		}
 		
 		
 	}
@@ -124,10 +131,11 @@ public class SRserver {
 	FileInputStream fis = new FileInputStream("teste1"); 
 	InetAddress IPAddress = InetAddress.getByName("localhost");	
 	int port = 2000;	
+	int ackPort = 2001;	
+	
+	SRserver breno = new SRserver();
 		
-		
-		
-		
+	breno.criarPacote(fis, IPAddress, port, ackPort);	
 		
 		
 	}

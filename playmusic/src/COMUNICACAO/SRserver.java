@@ -12,25 +12,34 @@ import java.util.TreeSet;
 public class SRserver {
 	//declarações
 	byte[] buffer = new byte[1000];
-	byte[] pacote = new byte[1003];
+	byte[] pacote = new byte[1004];
 	public static int DEBUG = 1;
 	public static DatagramSocket clientSocket;
 	public static SortedSet<Short> semACK = new TreeSet<Short>();
 	public static TreeMap <Short,DatagramPacket> pacotes = new TreeMap<Short,DatagramPacket>();
-	public static short janela;
+	public static short janela = 50;
 	public static short base;
 	public static boolean esperar = true;
 	final public static int timeout = 500;
 	
 	
 	
-	public void criarPacote(FileInputStream fis,InetAddress IPAddress,int port, int ackPort){
+	public void criarPacote(FileInputStream fis,InetAddress IPAddress,int port){
+		int ackPort;
+		
+		if (port==1) ackPort = port++; //criando uma porta para ack 
+		else ackPort = port--;
+		
 		
 		try {
-			int numerolido = fis.read(buffer);//lê do arquivo (fis) e salva no buffer
+
 			
-			while(numerolido != -1){//quando for igual a um quer dizer que não tem mais o que ler
-				short numeroDeSequencia = 0;
+			clientSocket = new DatagramSocket();
+			short numeroDeSequencia = 0;
+			//int numerolido = fis.read(buffer);//lê do arquivo (fis) e salva no buffer
+			
+			for(int numerolido; (numerolido = fis.read(buffer)) != -1;){//quando for igual a um quer dizer que não tem mais o que ler
+				numeroDeSequencia++;
 				pacote[0]= ByteUtils.convertToBytes(numeroDeSequencia)[0]; //conversão de short para byte, leva 2 bytes
 				pacote[1]= ByteUtils.convertToBytes(numeroDeSequencia)[1];
 				
@@ -52,17 +61,23 @@ public class SRserver {
 				semACK.add(numeroDeSequencia); //salvando
 				
 				buffer = new byte[1000];//limpando
-				pacote = new byte[1003];//limpando
+				pacote = new byte[1004];//limpando
 				
-				
+			}
+			
+			
+		} catch (IOException e) {}
+			
 				Thread ackThread = new Thread(new ackThread(ackPort, pacotes.lastKey(), timeout));
 		        ackThread.start();
 		        ackThread.setPriority(Thread.MAX_PRIORITY-1);
 		        
-		        
+
+		        short proximo = 1;
+		       
 		        
 		        base = 1;
-				short proximo = 1;
+				
 				
 				while(esperar){
 					
@@ -70,17 +85,19 @@ public class SRserver {
 						if(pacotes.get(proximo)!=null){
 							try {
 								clientSocket.send(pacotes.get(proximo));
-								
+								new Thread(new timerThread(proximo)).start();
 								
 							} catch (IOException e) {}
 							
 						}
+						proximo++;
 					}
+					
 					
 				}
 				
-			}
-		} catch (IOException e) {}
+			
+	
 		
 		
 	}
@@ -135,7 +152,7 @@ public class SRserver {
 	
 	SRserver breno = new SRserver();
 		
-	breno.criarPacote(fis, IPAddress, port, ackPort);	
+	breno.criarPacote(fis, IPAddress, port);	
 		
 		
 	}

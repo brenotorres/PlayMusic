@@ -26,9 +26,12 @@ public class SRclient {
 	 ArrayList <DatagramPacket> acks = new ArrayList<DatagramPacket>();
 	 SortedSet<Short> trackBase=new TreeSet<Short>();
 	
-	public File receber(int port,InetAddress IP,int ackPort ) throws IOException{
-		int window = 300;
+	public File receber(int port,InetAddress IP ) throws IOException{
+		int window = 50, ackPort;
 		short base, SeqNo = 0;
+		
+		 if (port==1) ackPort = port++; 
+		 else ackPort = port--;	
 		
 		DatagramSocket serverSocket = new DatagramSocket(port);
         serverSocket.setReuseAddress(true);
@@ -73,14 +76,14 @@ public class SRclient {
 			 seq[0] = buffer[0];
 			 seq[1] = buffer[1];
 			 SeqNo = ByteUtils.convertShortFromBytes(seq);
-			 //if(DEBUG > 1) System.out.println("Received "+SeqNo);
+			 System.out.println("Received "+SeqNo);
 			 if ((SeqNo >= base) && (SeqNo <= (base+window-1))){
 				 pacotes.put(SeqNo, ByteUtils.subbytes(buffer, 2, 1002));
 				 clientSocket.send(acks.get(SeqNo));
 				 byte tmp[] = new byte[2];
 				 tmp[0] = acks.get(SeqNo).getData()[0];
 				 tmp[1] = acks.get(SeqNo).getData()[1];
-				 //if(DEBUG > 1) System.out.println("ACK "+ByteUtils.convertShortFromBytes(tmp));
+				 System.out.println("ACK "+ByteUtils.convertShortFromBytes(tmp));
 				 trackBase.remove(SeqNo);
 				 if (base == SeqNo) { 
 					 base = trackBase.first(); 
@@ -92,7 +95,7 @@ public class SRclient {
 				 byte tmp[] = new byte[2];
 				 tmp[0] = acks.get(SeqNo).getData()[0];
 				 tmp[1] = acks.get(SeqNo).getData()[1];
-				 //if(DEBUG > 1) System.out.println("ACK "+ByteUtils.convertShortFromBytes(tmp));
+				 System.out.println("ACK "+ByteUtils.convertShortFromBytes(tmp));
 				 continue;
 			 }
 		 } 
@@ -124,9 +127,6 @@ public class SRclient {
 				return filename;
 	}
 	
-	
-	
-	
 	public static void main(String[] args) throws UnknownHostException {
 		
 		 
@@ -138,7 +138,7 @@ public class SRclient {
 		
 			File breno2 = null;
 			try {
-				breno2 = breno.receber( port , IPAddress, ackPort);
+				breno2 = breno.receber( port , IPAddress);
 			} catch (IOException e) {
 				
 				e.printStackTrace();
@@ -146,6 +146,9 @@ public class SRclient {
 			
 			System.out.println(breno2.exists());
 		}
+	
+	
+
 }	
 	
 

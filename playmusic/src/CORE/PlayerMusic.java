@@ -9,6 +9,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -22,10 +23,13 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	private File dataSource;
 	private Thread thread;
 	private AudioFileFormat baseFileFormat = null;
-	private AudioFormat baseFormat = null;
 	private String author;
 	private String title;
 	private String album; 
+
+
+	private FloatControl gainControl;
+	private boolean controleVolume = false;
 
 
 	public boolean erro = false;
@@ -56,11 +60,9 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 
 	protected void closeStream(){
 		try {
-			synchronized (audioin){
-				if (audioin != null){
-					audioin.close();
-					audioin = null;
-				}
+			if (audioin != null){
+				audioin.close();
+				audioin = null;
 			}
 		} catch (IOException e) {
 			erro = true;
@@ -92,7 +94,9 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 				state = STOPPED;
 				line.stop();
 				line.flush();
-				closeStream();
+				synchronized (audioin){
+					closeStream();
+				}
 			}
 		}
 	}
@@ -106,11 +110,14 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 		dataSource = file;
 		try {
 			if (audioin != null){
-				closeStream();
+				synchronized (audioin){
+					closeStream();
+				}
 			}
 			prop(file);
 			audioin = AudioSystem.getAudioInputStream(dataSource);
 			if (audioin != null){
+				//volumeControl(audioin);
 				format = audioin.getFormat();
 				decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED,
 						format.getSampleRate(), 16, format.getChannels(), format.getChannels() * 2,
@@ -125,20 +132,22 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	}
 
 	protected void skip(long bytes){
-		try {
+		try {	
 			int pState = state;
 			state = SEEKING;
 			long total = 0;
 			long skipped;
 			boolean sair = false;
-			while (total < bytes && !sair){
-				skipped = audioin.skip(bytes - total);
-				if (skipped == 0){
-					sair = true;
+			synchronized (audioin){
+				while (total < bytes && !sair){
+					skipped = audioin.skip(bytes - total);
+					if (skipped == 0){
+						sair = true;
+					}
+					total = total + skipped;
 				}
-				total = total + skipped;
+				state = pState;
 			}
-			state = pState;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -146,23 +155,24 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 
 	public void run() {
 		try {
-			synchronized (audioin){
-				byte[] data = new byte[4096];
-				DataLine.Info info = new DataLine.Info(SourceDataLine.class, decodedFormat);
-				line = (SourceDataLine) AudioSystem.getLine(info);
-				line.open(decodedFormat);
-				if (line != null){
-					// Start
-					state = PLAYING;
-					line.start();
-					int nBytesRead = 0, nBytesWritten = 0;
+			byte[] data = new byte[4096];
+			DataLine.Info info = new DataLine.Info(SourceDataLine.class, decodedFormat);
+			line = (SourceDataLine) AudioSystem.getLine(info);
+			line.open(decodedFormat);
+			if (line != null){
+				volumeControl();
+				// Start
+				state = PLAYING;
+				line.start();
+				synchronized (audioin){
+					int nBytesRead = 0;
 					while (nBytesRead != -1 && state != STOPPED){
 						nBytesRead = audioin.read(data, 0, data.length);
-						if (nBytesRead != -1){
-							nBytesWritten = line.write(data, 0, nBytesRead);
+						if (nBytesRead != -1 && line != null){
+							line.write(data, 0, nBytesRead);
 						}
-						while(state == PAUSED || state == SEEKING){System.out.println("espera");}
 					}
+					while(state == PAUSED || state == SEEKING){}
 					// Stop
 					if (line != null){
 						state = UNKNOWN;
@@ -200,7 +210,6 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 
 	protected void prop(File file) throws UnsupportedAudioFileException, IOException {
 		baseFileFormat = AudioSystem.getAudioFileFormat(file);
-		baseFormat = baseFileFormat.getFormat();
 		Map properties = ((AudioFileFormat)baseFileFormat).properties();
 
 		String key = "author";
@@ -224,8 +233,39 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	}
 
 	public void seek(int sec){
-		long skip = (int)decodedFormat.getFrameSize() * (int)decodedFormat.getFrameRate() * sec;
+		stopMusic();
+		line = null;
+		System.out.println("Entrou agora!");
+		play(dataSource);
+		long skip = Math.round(format.getFrameRate() * decodedFormat.getFrameSize() * sec * 100);
+		System.out.println("framerate "+(int)format.getFrameRate()+" framesize "+decodedFormat.getFrameSize()+" skip "+skip);
 		skip(skip);
 	}
 
+	protected void volumeControl(){
+		if ( (line != null) && (line.isControlSupported(FloatControl.Type.MASTER_GAIN))){
+			gainControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
+			controleVolume = true;
+		}else{
+			controleVolume = false;
+		}
+	}
+
+	public void set_volume(float fa){
+		if(controleVolume&&(fa<get_maximo())&&(fa>get_minimo())){
+			gainControl.setValue(fa); 
+			//System.out.println("#comeu a bronca"+gainControl.getValue());
+		}else{
+			volumeControl();
+			//System.out.println("#comendo a bronca");
+		}
+	}
+
+	public float get_maximo(){
+		return gainControl.getMaximum();
+	}
+
+	public float get_minimo(){
+		return gainControl.getMinimum();
+	}
 }

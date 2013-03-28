@@ -18,4 +18,10 @@ public interface interfacePlayer {
     
     String get_author();
     
+    void set_volume(float f);
+    	
+    float get_maximo();
+    
+    float get_minimo();
+    
 }

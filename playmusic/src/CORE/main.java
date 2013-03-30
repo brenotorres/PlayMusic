@@ -10,6 +10,9 @@ public class main {
 	public static void main(String[] args){
 		BufferedReader b = new BufferedReader(new InputStreamReader(System.in));
 		interfacePlayer i = new PlayerMusic();
+		Servidor s = new Servidor();
+		s.onServer();
+		
 		try{
 			File file = new File("manguetown.mp3");
 			i.play(file);

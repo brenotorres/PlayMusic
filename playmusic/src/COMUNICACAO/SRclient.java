@@ -27,7 +27,7 @@ public class SRclient {
 	 SortedSet<Short> trackBase=new TreeSet<Short>();
 	
 	public File receber(int port,InetAddress IP ) throws IOException{
-		int window = 50, ackPort;
+		int window = 7, ackPort;
 		short base, SeqNo = 0;
 		
 		 if (port==1) ackPort = port++; 
@@ -69,6 +69,7 @@ public class SRclient {
 			 buffer = receivePacket.getData();
 			 }
 			 catch(SocketTimeoutException e) {
+				 waiting = false;
 				 continue;
 			 }
 			 serverSocket.setSoTimeout(1000);

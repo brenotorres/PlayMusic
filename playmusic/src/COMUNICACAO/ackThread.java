@@ -16,15 +16,7 @@ public class ackThread extends Thread {
 	
 	
 
-    public ackThread(int ackPort, short ultimo, int timeout) {
-    	ultimoAck = ultimo;
-		try {
-			serverSocket = new DatagramSocket(ackPort);
-			serverSocket.setSoTimeout(0);
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-    }
+ 
 	
 	
 	public void run() {
@@ -48,6 +40,7 @@ public class ackThread extends Thread {
 			 
 		short sequenciaAtual = ByteUtils.convertShortFromBytes(sequenciaAck);	 
 		
+		
 		short b = SRserver.getBase();
 		
 		
@@ -60,6 +53,7 @@ public class ackThread extends Thread {
 			
 			if(sequenciaAtual == b && !SRserver.isSeqEmpty()){
 				SRserver.setBase(SRserver.seqFirst()); //isso faz a base caminhar
+				System.out.println("Setou " +sequenciaAtual+ " como a nova base");
 			}
 			
 			
@@ -83,7 +77,15 @@ public class ackThread extends Thread {
 	public static boolean ackContains(short c) {
 		return ackRecebido.contains(c);
 	}
-	
+	   public ackThread(int ackPort, short ultimo, int timeout) {
+	    	ultimoAck = ultimo;
+			try {
+				serverSocket = new DatagramSocket(ackPort);
+				serverSocket.setSoTimeout(0);
+			} catch (SocketException e) {
+				e.printStackTrace();
+			}
+	    }
 	
 	
 }

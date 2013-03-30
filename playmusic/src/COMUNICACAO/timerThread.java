@@ -68,7 +68,7 @@ public class timerThread extends Thread {
 					// in case by the time this reaches the timeout, the ACK is received and the clientSocket is closed.
 					System.exit(0);
 				}
-				if(DEBUG > 1) System.out.println("Resend "+threadSequencia);
+				System.out.println("Resend "+threadSequencia);
 			}
 		}
 	

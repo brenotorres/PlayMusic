@@ -14,7 +14,8 @@ public class main {
 		//s.onServer();
 		
 		try{
-			File file = new File("manguetown.mp3");
+			File file = new File("C:/Users/Toinho/Desktop/My Shared Folder/she wolf.mp3");
+			System.out.println(file.getName());
 			i.play(file);
 			String f;
 			System.out.println(i.get_album()+" - "+i.get_author()+" - "+i.get_title());

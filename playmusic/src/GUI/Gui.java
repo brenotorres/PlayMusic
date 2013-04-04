@@ -41,7 +41,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 
-public class Gui extends Application { // 1
+public class Gui extends Application {
 
 	private interfacePlayer i = new PlayerMusic();
 	private Scene cena ;

@@ -34,11 +34,11 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 
 	public boolean erro = false;
 
-	public static final int UNKNOWN = -1;
-	public static final int PLAYING = 0;
-	public static final int PAUSED = 1;
-	public static final int STOPPED = 2;
-	public static final int SEEKING = 3;
+	private static final int UNKNOWN = -1;
+	private static final int PLAYING = 0;
+	private static final int PAUSED = 1;
+	private static final int STOPPED = 2;
+	private static final int SEEKING = 3;
 	private int state = UNKNOWN;
 
 	public PlayerMusic(){
@@ -82,8 +82,8 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 		if (line != null){
 			if(state == PLAYING){
 				state = PAUSED;
-				line.stop();
 				line.flush();
+				line.stop();
 			}
 		}
 	}
@@ -102,8 +102,10 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	}
 
 	protected void resumeMusic(){
-		state = PLAYING;
-		line.start();
+		if(line!=null){
+			state = PLAYING;
+			line.start();
+		}
 	}
 
 	protected void open(File file){
@@ -153,26 +155,72 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 		}
 	}
 
+	//	public void run() {
+	//		try {
+	//			byte[] data = new byte[4096];
+	//			DataLine.Info info = new DataLine.Info(SourceDataLine.class, decodedFormat);
+	//			line = (SourceDataLine) AudioSystem.getLine(info);
+	//			line.open(decodedFormat);
+	//			if (line != null){
+	//				volumeControl();
+	//				// Start
+	//				state = PLAYING;
+	//				line.start();
+	//				synchronized (audioin){
+	//					int nBytesRead = 0;
+	//					while (nBytesRead != -1 && state != STOPPED){
+	//						nBytesRead = audioin.read(data, 0, data.length);
+	//						if (nBytesRead != -1 && line != null){
+	//							line.write(data, 0, nBytesRead);
+	//						}
+	//						while(state == PAUSED || state == SEEKING){}
+	//					}
+	//					// Stop
+	//					if (line != null){
+	//						state = UNKNOWN;
+	//						line.drain();
+	//						line.stop();
+	//						line.close();
+	//						line = null;
+	//						closeStream();
+	//					}
+	//				}
+	//			}
+	//		} catch (LineUnavailableException e) {
+	//			erro = true;
+	//		} catch (IOException e) {
+	//			erro = true;
+	//		}
+	//	}
+
 	public void run() {
 		try {
-			byte[] data = new byte[4096];
-			DataLine.Info info = new DataLine.Info(SourceDataLine.class, decodedFormat);
-			line = (SourceDataLine) AudioSystem.getLine(info);
-			line.open(decodedFormat);
-			if (line != null){
-				volumeControl();
-				// Start
-				state = PLAYING;
-				line.start();
-				synchronized (audioin){
-					int nBytesRead = 0;
+			synchronized (audioin){
+				byte[] data = new byte[4096];
+				DataLine.Info info = new DataLine.Info(SourceDataLine.class, decodedFormat);
+				line = (SourceDataLine) AudioSystem.getLine(info);
+				line.open(decodedFormat);
+				if (line != null){
+					volumeControl();
+					// Start
+					state = PLAYING;
+					line.start();
+					int nBytesRead = 0, nBytesWritten = 0;
 					while (nBytesRead != -1 && state != STOPPED){
-						nBytesRead = audioin.read(data, 0, data.length);
-						if (nBytesRead != -1 && line != null){
-							line.write(data, 0, nBytesRead);
+						if(state==PLAYING){	
+							nBytesRead = audioin.read(data, 0, data.length);
+							if (nBytesRead != -1){
+								nBytesWritten = line.write(data, 0, nBytesRead);
+							}
+						}else{
+							try {
+								Thread.sleep(0);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}	
 						}
 					}
-					while(state == PAUSED || state == SEEKING){}
 					// Stop
 					if (line != null){
 						state = UNKNOWN;
@@ -192,6 +240,7 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	}
 
 	public void play(File file) {
+		
 		if (state == PAUSED){
 			resumeMusic();
 		}else{

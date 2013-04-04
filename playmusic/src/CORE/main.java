@@ -10,17 +10,22 @@ public class main {
 	public static void main(String[] args){
 		BufferedReader b = new BufferedReader(new InputStreamReader(System.in));
 		interfacePlayer i = new PlayerMusic();
-		Servidor s = new Servidor();
-		s.onServer();
+		//Servidor s = new Servidor();
+		//s.onServer();
 		
 		try{
-			File file = new File("manguetown.mp3");
+			File file = new File("C:/Users/Toinho/Desktop/My Shared Folder/she wolf.mp3");
+			System.out.println(file.getName());
 			i.play(file);
 			String f;
 			System.out.println(i.get_album()+" - "+i.get_author()+" - "+i.get_title());
 			while (true){
 				f = b.readLine();
-				i.seek(Integer.parseInt(f));
+				i.pause();
+				f = b.readLine();
+				//i.seek(Integer.parseInt(f));
+				i.play(file);
+				
 				System.out.println(f);
 			}
 		}catch (IOException e){

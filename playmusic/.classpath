@@ -2,8 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/jar/jl1.0.1.jar"/>
-	<classpathentry kind="lib" path="C:/jar/mp3spi1.9.5.jar"/>
-	<classpathentry kind="lib" path="C:/jar/tritonus-share-0.3.6.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JAVAFX"/>
+	<classpathentry kind="lib" path="C:/Jar/jl1.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Jar/mp3spi1.9.5.jar"/>
+	<classpathentry kind="lib" path="C:/Jar/tritonus-share-0.3.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

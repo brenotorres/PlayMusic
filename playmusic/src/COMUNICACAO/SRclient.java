@@ -26,7 +26,7 @@ public class SRclient {
 	 ArrayList <DatagramPacket> acks = new ArrayList<DatagramPacket>();
 	 SortedSet<Short> trackBase=new TreeSet<Short>();
 	 //public static DatagramSocket clientSocketString;
-	public File receber(int port,InetAddress IP ) throws IOException{
+	public retorno receber(int port,InetAddress IP ) throws IOException{
 		int window = 7, ackPort;
 		short base, SeqNo = 0;
 		
@@ -122,11 +122,20 @@ public class SRclient {
 	            
 	            
 	            
+	            InetAddress IPfonte = serverSocket.getInetAddress();
+	            
+	            int portFonte = serverSocket.getPort();
+	            
+	            retorno teste = new retorno(IPfonte, portFonte,filename);
+	            
 	            fos.write(ByteUtils.subbytes(arquivoComLixo, 0, lastpos));
 	            fos.close();
 	            serverSocket.close();
 	            
-				return filename;
+				return teste;
+				
+				
+				
 	}
 	
 	
@@ -152,20 +161,20 @@ public class SRclient {
 		
 		SRclient breno = new SRclient();	
 		
-			//File breno2 = null;
-			//try {
-				//breno2 = breno.receber( port , IPAddress);
-			//} catch (IOException e) {
-				
-			//	e.printStackTrace();
-			//}
-			String nome = "manteiga";
+			retorno breno2 = null;
 			try {
-				breno.enviarString(nome, IPAddress, port);
+				breno2 = breno.receber( port , IPAddress);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
+			//String nome = "manteiga";
+			//try {
+			//	breno.enviarString(nome, IPAddress, port);
+			//} catch (IOException e) {
+			//	// TODO Auto-generated catch block
+			//	e.printStackTrace();
+			//}
 			
 			
 			//System.out.println(breno2.exists());

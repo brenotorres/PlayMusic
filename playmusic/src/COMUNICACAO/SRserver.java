@@ -6,7 +6,7 @@ import java.net.*;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-class SRserver {
+public class SRserver {
 	
 	
 	public static short base;
@@ -150,9 +150,9 @@ class SRserver {
 		
 		SRserver breno = new SRserver();
 		
-		String teste =  breno.receberString(port);
-		System.out.println(teste);
-		//breno.criarPacote(fis, IPAddress, port);	
+		//String teste =  breno.receberString(port);
+		//System.out.println(teste);
+		breno.criarPacote(fis, IPAddress, port);	
 			
 			
 		}

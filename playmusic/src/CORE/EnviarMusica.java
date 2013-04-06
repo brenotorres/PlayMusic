@@ -1,21 +1,26 @@
 package CORE;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
+
+import COMUNICACAO.SRserver;
 
 public class EnviarMusica extends Thread {
 
 	private String musica;
-	//private String autor;
 	private RepositorioMusica repositorio;
+	private SRserver s;
+	private InetAddress IP;
 
-	public EnviarMusica(String musica, String autor, RepositorioMusica repositorio){
+	public EnviarMusica(String musica, RepositorioMusica repositorio, SRserver s, InetAddress IP){
 		this.musica = musica;
-		//this.autor = autor;
 		this.repositorio = repositorio;
+		this.IP = IP;
+		this.s = s;
 	}
 
 	public void run(){
@@ -23,8 +28,8 @@ public class EnviarMusica extends Thread {
 		try {
 			arquivo = this.repositorio.procurarMusica(musica);
 			
-			FileOutputStream fos = new FileOutputStream(arquivo);
-			//Chamar o metodo enviar arquivo da comunicação
+			FileInputStream fis = new FileInputStream(arquivo);
+			s.criarPacote(fis, IP, 5004);
 			
 		} catch (UnsupportedAudioFileException | IOException e) {
 			e.printStackTrace();

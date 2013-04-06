@@ -1,48 +1,45 @@
 package CORE;
 
-import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+
+import javax.sound.sampled.UnsupportedAudioFileException;
+
+import COMUNICACAO.SRserver;
 
 public class Servidor {
 
 	private RepositorioMusica musicas;
+	private SRserver server;
 
 	public Servidor(String diretorio){
 		this.musicas = new RepositorioMusica(diretorio);
+		server = new SRserver();
+		IniciarRepositorio();
 	}
 
-	public void onServer(){
-		while (true){
-			//Recebe String da camada comunicação
-			String receive = "Manguetown.mp3";
-			if (receive.contains(":")){
-				enviarMusica(receive.substring(0, receive.indexOf(":")), receive.substring(receive.indexOf(":") + 1, receive.length()));
-			}else{
-				if (receive.equals("pause")){
-					pause();
-				}else{
-					if (receive.equals("resume")){
-						resume();
-					}else{
-						if (receive.equals("lista")){
-							enviarLista(); 
-						}else{
-							if (receive.equals("cancel")){
-								cancel();
-							}
-						}
-					}
-				}
-			}
+	public void IniciarRepositorio(){
+		try {
+			musicas.gerarLista();
+		} catch (UnsupportedAudioFileException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
+	
+	public void onServer(){
+		Thread controle = new ControleServidor(this, server);
+		controle.start();
+	}
 
-	protected void enviarLista(){
-		Thread lista = new EnviarLista(musicas);
+	protected void enviarLista(InetAddress IP){
+		Thread lista = new EnviarLista(musicas, server, IP);
 		lista.start();
 	}
 
-	protected void enviarMusica(String musica, String autor){
-		Thread music = new EnviarMusica(musica, autor, musicas);
+	protected void enviarMusica(String musica, InetAddress IP){
+		Thread music = new EnviarMusica(musica, musicas, server, IP);
 		music.start();
 	}
 	

@@ -23,7 +23,7 @@ public class RepositorioMusica {
 	}
 
 	protected Vector<Mp3> gerarLista() throws UnsupportedAudioFileException, IOException{
-		lista = null;
+		lista = new Vector<Mp3>();
 		File arquivos[] = diretorio.listFiles();
 		Mp3 temp;
 		long microseconds;
@@ -36,7 +36,7 @@ public class RepositorioMusica {
 			temp.setAlbum((String)mapa.get("album"));
 			temp.setGenero((String)mapa.get("id3v1genres"));
 			temp.setTitulo((String)mapa.get("title"));
-			temp.setNome((String)mapa.get(arquivos[i].getName()));
+			temp.setNome(arquivos[i].getName());
 			temp.setTamanho("" + arquivos[i].length());
 			microseconds = (long)mapa.get("duration");
 			int mili = (int) (microseconds / 1000);
@@ -76,7 +76,7 @@ public class RepositorioMusica {
 			}
 		}
 		if (encontrou){
-			arquivo = new File(nomeDiretorio + musica);
+			arquivo = new File(nomeDiretorio + "/" + musica);
 		}
 		return arquivo;
 	}

@@ -1,6 +1,8 @@
 package CORE;
 
-public class Mp3 {
+import java.io.Serializable;
+
+public class Mp3 implements Serializable{
 
 	private String nome;
 	private String autor;

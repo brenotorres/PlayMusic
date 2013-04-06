@@ -301,13 +301,20 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	}
 
 	public void set_volume(float fa){
-		if(controleVolume&&(fa<get_maximo())&&(fa>get_minimo())){
+		if(controleVolume&&(fa<=get_maximo())&&(fa>=get_minimo())){
 			gainControl.setValue(fa); 
 			//System.out.println("#comeu a bronca"+gainControl.getValue());
 		}else{
 			volumeControl();
 			//System.out.println("#comendo a bronca");
 		}
+	}
+	
+	public float get_volumeAtual(){
+		volumeControl();
+		if(controleVolume)
+			return gainControl.getValue();
+		return 0;
 	}
 
 	public float get_maximo(){
@@ -316,5 +323,9 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 
 	public float get_minimo(){
 		return gainControl.getMinimum();
+	}
+	
+	public long Microseconds(){
+		return line.getMicrosecondPosition();
 	}
 }

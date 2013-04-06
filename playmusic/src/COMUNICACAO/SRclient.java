@@ -25,7 +25,7 @@ public class SRclient {
 	 TreeMap <Short,byte[]> pacotes = new TreeMap<Short,byte[]>();
 	 ArrayList <DatagramPacket> acks = new ArrayList<DatagramPacket>();
 	 SortedSet<Short> trackBase=new TreeSet<Short>();
-	
+	 //public static DatagramSocket clientSocketString;
 	public File receber(int port,InetAddress IP ) throws IOException{
 		int window = 7, ackPort;
 		short base, SeqNo = 0;
@@ -109,23 +109,38 @@ public class SRclient {
 		 
 	         	File filename = new File("novo");
 	            FileOutputStream fos = new FileOutputStream(filename);
-	            byte[] entireFileWithJunk = bos.toByteArray();
-	            int lastpos = entireFileWithJunk.length;
-	            // find what's the last zero
-	            for(int i=entireFileWithJunk.length-1;i>=0;i--) {
-	            	if(entireFileWithJunk[i] != 0) {
+	            byte[] arquivoComLixo = bos.toByteArray();
+	            int lastpos = arquivoComLixo.length;
+	            
+	            
+	            for(int i=arquivoComLixo.length-1;i>=0;i--) {
+	            	if(arquivoComLixo[i] != 0) {
 	            		lastpos = i+1;
 	            		break;
 	            	}
 	            }
 	            
 	            
-	            // subbyte the string and write it to file
-	            fos.write(ByteUtils.subbytes(entireFileWithJunk, 0, lastpos));
+	            
+	            fos.write(ByteUtils.subbytes(arquivoComLixo, 0, lastpos));
 	            fos.close();
 	            serverSocket.close();
 	            
 				return filename;
+	}
+	
+	
+	public void enviarString(String nome,InetAddress IPAddress,int port ) throws IOException{
+		
+		byte[] string = new byte[100];
+		
+		DatagramSocket clientSocket = new DatagramSocket();
+	    string = nome.getBytes();
+	    
+	    DatagramPacket pck = new DatagramPacket(string, string.length,IPAddress,port);
+	    
+	    clientSocket.send(pck);
+	    	
 	}
 	
 	public static void main(String[] args) throws UnknownHostException {
@@ -133,19 +148,27 @@ public class SRclient {
 		 
 		InetAddress IPAddress = InetAddress.getByName("localhost");	
 		int port = 2000;	
-		int ackPort = 2001;	
+		//int ackPort = 2001;	
 		
 		SRclient breno = new SRclient();	
 		
-			File breno2 = null;
-			try {
-				breno2 = breno.receber( port , IPAddress);
-			} catch (IOException e) {
+			//File breno2 = null;
+			//try {
+				//breno2 = breno.receber( port , IPAddress);
+			//} catch (IOException e) {
 				
+			//	e.printStackTrace();
+			//}
+			String nome = "manteiga";
+			try {
+				breno.enviarString(nome, IPAddress, port);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
-			System.out.println(breno2.exists());
+			
+			//System.out.println(breno2.exists());
 		}
 	
 	

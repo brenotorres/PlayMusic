@@ -1,44 +1,61 @@
 package CORE;
 
-import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+
+import javax.sound.sampled.UnsupportedAudioFileException;
+
+import COMUNICACAO.SRserver;
 
 public class Servidor {
 
-	private File diretorio = new File("H:/Musicas");
+	private RepositorioMusica musicas;
+	private SRserver server;
 
-	public Servidor(){
-		
+	public Servidor(String diretorio){
+		this.musicas = new RepositorioMusica(diretorio);
+		server = new SRserver();
+		IniciarRepositorio();
 	}
 
-	public void onServer(){
-		while (true){
-			//Recebe String da camada comunicação
-			String receive = "Manguetown:Chico Science";
-			if (receive.contains(":")){
-				enviarMusica(receive.substring(0, receive.indexOf(":")), receive.substring(receive.indexOf(":") + 1, receive.length()));
-			}else{
-				if (receive.equals("pause")){
-					//Chamar função pausa transferencia
-				}else{
-					if (receive.equals("start")){
-						//Chamar função reinicia transferencia
-					}else{
-						if (receive.equals("lista")){
-							enviarLista(); 
-						}
-					}
-				}
-			}
+	public void IniciarRepositorio(){
+		try {
+			musicas.gerarLista();
+		} catch (UnsupportedAudioFileException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
+	
+	public void onServer(){
+		Thread controle = new ControleServidor(this, server);
+		controle.start();
+	}
 
-	protected void enviarLista(){
-		Thread lista = new EnviarLista(diretorio);
+	protected void enviarLista(InetAddress IP){
+		Thread lista = new EnviarLista(musicas, server, IP);
 		lista.start();
 	}
 
-	protected void enviarMusica(String musica, String autor){
-		Thread music = new EnviarMusica(musica, autor, diretorio);
+	protected void enviarMusica(String musica, InetAddress IP){
+		Thread music = new EnviarMusica(musica, musicas, server, IP);
 		music.start();
+	}
+	
+	protected void pause(){
+		//Chamar função pausa transferencia
+	}
+	
+	protected void resume(){
+		//Chamar função reinicia transferencia
+	}
+	
+	protected void cancel(){
+		//Chamar função que cancela transferencia
+	}
+	
+	protected void listaUser(){
+		
 	}
 }

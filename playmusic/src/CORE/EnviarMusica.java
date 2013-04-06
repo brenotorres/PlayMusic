@@ -1,51 +1,38 @@
 package CORE;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Map;
+import java.net.InetAddress;
 
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
+import COMUNICACAO.SRserver;
 
 public class EnviarMusica extends Thread {
 
 	private String musica;
-	private String autor;
-	private File diretorio;
-	private AudioFileFormat audioFileFormat;
-	private Map mapa;
+	private RepositorioMusica repositorio;
+	private SRserver s;
+	private InetAddress IP;
 
-	public EnviarMusica(String musica, String autor, File diretorio){
+	public EnviarMusica(String musica, RepositorioMusica repositorio, SRserver s, InetAddress IP){
 		this.musica = musica;
-		this.autor = autor;
-		this.diretorio = diretorio;
+		this.repositorio = repositorio;
+		this.IP = IP;
+		this.s = s;
 	}
 
 	public void run(){
-		File arquivo = null;
-		File arquivos[] = diretorio.listFiles();
-		boolean encontrou = false;
+		File arquivo;
 		try {
-			for (int i = 0; i < arquivos.length && !encontrou; i++){
-				audioFileFormat = AudioSystem.getAudioFileFormat(arquivos[i]);
-				mapa = ((AudioFileFormat)audioFileFormat).properties();
-				if (musica.equals(((String)mapa.get("title")))){
-					if (autor.equals(((String)mapa.get("author")))){
-						arquivo = arquivos[i];
-						encontrou = true;
-					}
-				}
-			}
-			FileOutputStream fos = new FileOutputStream(arquivo);
-			//Chamar o metodo enviar arquivo da comunicação
-
-		} catch (UnsupportedAudioFileException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+			arquivo = this.repositorio.procurarMusica(musica);
+			
+			FileInputStream fis = new FileInputStream(arquivo);
+			s.criarPacote(fis, IP, 5004);
+			
+		} catch (UnsupportedAudioFileException | IOException e) {
 			e.printStackTrace();
 		}
 	}
-
 }

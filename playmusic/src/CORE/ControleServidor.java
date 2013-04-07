@@ -1,51 +1,59 @@
 package CORE;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
+import COMUNICACAO.SRclient;
 import COMUNICACAO.SRserver;
+import COMUNICACAO.retorno;
 
 public class ControleServidor extends Thread{
-	
+
 	private Servidor s;
 	private SRserver srs;
-	
-	public ControleServidor(Servidor s, SRserver srs){
+	private SRclient src;
+	private int porta;
+
+	public ControleServidor(Servidor s, SRserver srs, SRclient src, int porta){
 		this.s = s;
 		this.srs = srs;
+		this.src = src;
+		this.porta = porta;
 	}
-	
+
 	public void run(){
-		String receive = "";
+		DatagramSocket serverSocket = null;
+		retorno receive;
+		String teste = "";
 		while (true){
 			try {
-				receive = srs.receberString(5000);
-				System.out.println(receive);
+				serverSocket = new DatagramSocket(porta);
+				receive = src.receber(serverSocket, porta, InetAddress.getByName("localhost"));
+				BufferedReader br = new BufferedReader(new FileReader(receive.getFilenam()));
+				teste = br.readLine();
 			} catch (IOException e) {}
-			if (receive.length() > 4 && receive.substring(receive.length()-4, receive.length()).equals(".mp3")){
-				try {
-					s.enviarMusica(receive, InetAddress.getByName("localhost"));
-					receive = "";
-				} catch (UnknownHostException e) {}
+			if (teste.length() > 4 && teste.substring(teste.length()-4, teste.length()).equals(".mp3")){
+				s.enviarMusica(teste, serverSocket.getInetAddress(), serverSocket.getPort());
+				teste = "";
 			}else{
-				if (receive.equals("pause")){
-					s.pause();
-					receive = "";
+				if (teste.equals("pause")){
+					s.pause(serverSocket.getInetAddress(), serverSocket.getPort());
+					teste = "";
 				}else{
-					if (receive.equals("resume")){
-						s.resume();
-						receive = "";
+					if (teste.equals("resume")){
+						s.resume(serverSocket.getInetAddress(), serverSocket.getPort());
+						teste = "";
 					}else{
-						if (receive.equals("lista")){
-							try {
-								s.enviarLista(InetAddress.getByName("localhost"));
-								receive = "";
-							} catch (UnknownHostException e) {}
+						if (teste.equals("lista")){System.out.println("listaaa");
+						s.enviarLista(serverSocket.getInetAddress(), serverSocket.getPort());
+						teste = "";
 						}else{
-							if (receive.equals("cancel")){
-								s.cancel();
-								receive = "";
+							if (teste.equals("cancel")){
+								s.cancel(serverSocket.getInetAddress(), serverSocket.getPort());
+								teste = "";
 							}
 						}
 					}

@@ -67,7 +67,7 @@ public class RepositorioMusica {
 			temp.setAutor((String)mapa.get("author"));
 			temp.setAlbum((String)mapa.get("album"));
 			String a = (String) mapa.get("mp3.id3tag.genre");
-			if(a.charAt(0)=='('&& a.charAt(a.length()-1)==')'){
+			if(a != null && a.charAt(0)=='('&& a.charAt(a.length()-1)==')'){
 				String semparen = a.substring(1,a.length()-1);
 				int numerogenero = Integer.parseInt(semparen); 
 				temp.setGenero(id3v1genres[numerogenero]);

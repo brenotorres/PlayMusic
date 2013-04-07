@@ -18,13 +18,13 @@ public class main {
 
 		Cliente c = null;
 		try {
-			c = new Cliente("C:/Users/Toinho/Desktop/MusicasRecebidas", InetAddress.getByName("localhost"));
+			c = new Cliente("C:/Users/Toinho/Desktop/Recebidos", InetAddress.getByName("localhost"));
 		} catch (UnknownHostException e) {}
 		
-//		Vector<Mp3> lista = c.solicitarlista();
-//		System.out.println(lista.get(1).getNome());
+		Vector<Mp3> lista = c.solicitarlista();
+		System.out.println(lista.get(1).getNome());
 
-		c.Download("she wolf.mp3");
+//		c.Download("she wolf.mp3");
 		//c.Download("03 - try.mp3");
 
 

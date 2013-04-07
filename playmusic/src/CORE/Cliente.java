@@ -1,16 +1,23 @@
 package CORE;
 
 import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import COMUNICACAO.SRclient;
+import COMUNICACAO.SRserver;
+import COMUNICACAO.retorno;
 
 public class Cliente{
 
@@ -18,11 +25,14 @@ public class Cliente{
 	private String TED;
 	private InetAddress IP;
 	private SRclient client;
+	private SRserver server;
+	private int porta;
 
 	public Cliente(String diretorio, InetAddress IP){
 		this.IP = IP;
 		repositorio = new RepositorioMusica(diretorio);
 		client = new SRclient();
+		server = new SRserver();
 		IniciarRepositorio();
 	}
 
@@ -39,12 +49,42 @@ public class Cliente{
 	public Vector<Mp3> solicitarlista(){
 		Vector<Mp3> lista = null;
 		try {
+			//Envia pro servidor uma solicitação de porta pra se conectar
+			DatagramSocket clientSocket = new DatagramSocket();
+			int localPorta = clientSocket.getLocalPort();
+			File arq = new File("string");
+			//arq.delete();
+			arq.createNewFile();
+			BufferedWriter out = new BufferedWriter(new FileWriter(arq));
+			out.write("porta");
+			out.close();
+			FileInputStream fis = new FileInputStream(arq);
+			server.criarPacote(clientSocket, fis, IP, 5000);
+
+			//Recebe a porta qua vai ouvir os comandos do cliente
+			clientSocket = new DatagramSocket(localPorta);
+			retorno receive = client.receber(clientSocket, localPorta, IP);
+			BufferedReader br = new BufferedReader(new FileReader(receive.getFilenam()));
+			porta = Integer.parseInt(br.readLine());
+
+
+			arq.delete();
+			arq.createNewFile();
+			out = new BufferedWriter(new FileWriter(arq));
+			out.write("lista");
+			out.close();
 			//chama metodo pra enviar string solicitando lista
-			client.enviarString("lista", IP, 5000);
+			clientSocket = new DatagramSocket();
+			localPorta = clientSocket.getLocalPort();
+			
+			System.out.println("-----------"+localPorta);
+			server.criarPacote(clientSocket, fis, IP, porta);
 
 			//chamar metodo pra receber o arquivo serializado
-			File arquivo = client.receber(5002, IP);
-			
+			clientSocket = new DatagramSocket(localPorta);
+			retorno r = client.receber(clientSocket, localPorta, IP);
+			File arquivo = r.getFilenam();
+
 			FileInputStream fileStream = new FileInputStream(arquivo);   //Vai receber do metodo
 			ObjectInputStream os = new ObjectInputStream(fileStream);
 
@@ -61,7 +101,7 @@ public class Cliente{
 	}
 
 	public void Download(String musica){
-		Thread d = new Download(musica, client, IP);
+		Thread d = new Download(musica, client, server, IP, porta);
 		d.start();
 	}
 

@@ -60,9 +60,13 @@ public class ackThread extends Thread {
 			//tratando para ultimo ACK
 			
 			if(sequenciaAtual==ultimoAck){
+				
+				if(SRserver.isSeqEmpty()){
+					
 				esperar1= false;
 				SRserver.esperar = false;
 				SRclient.waiting = false;
+				}
 			}
 			
 			

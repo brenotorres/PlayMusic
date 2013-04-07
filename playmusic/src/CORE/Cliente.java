@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -34,23 +35,14 @@ public class Cliente{
 		client = new SRclient();
 		server = new SRserver();
 		IniciarRepositorio();
+		IniciarConexao();
 	}
-
-	public void IniciarRepositorio(){
+	
+	public void IniciarConexao(){
+		//Envia pro servidor uma solicitação de porta pra se conectar
+		DatagramSocket clientSocket;
 		try {
-			repositorio.gerarLista();
-		} catch (UnsupportedAudioFileException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public Vector<Mp3> solicitarlista(){
-		Vector<Mp3> lista = null;
-		try {
-			//Envia pro servidor uma solicitação de porta pra se conectar
-			DatagramSocket clientSocket = new DatagramSocket();
+			clientSocket = new DatagramSocket();
 			int localPorta = clientSocket.getLocalPort();
 			File arq = new File("string");
 			//arq.delete();
@@ -66,18 +58,35 @@ public class Cliente{
 			retorno receive = client.receber(clientSocket, localPorta, IP);
 			BufferedReader br = new BufferedReader(new FileReader(receive.getFilenam()));
 			porta = Integer.parseInt(br.readLine());
+		} catch (SocketException e) {} catch (IOException e) {}
+	}
 
+	public void IniciarRepositorio(){
+		try {
+			repositorio.gerarLista();
+		} catch (UnsupportedAudioFileException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
+	public Vector<Mp3> solicitarlista(){
+		Vector<Mp3> lista = null;
+		try {
+			File arq = new File("string");
 			arq.delete();
 			arq.createNewFile();
-			out = new BufferedWriter(new FileWriter(arq));
+			BufferedWriter out = new BufferedWriter(new FileWriter(arq));
 			out.write("lista");
 			out.close();
+			FileInputStream fis = new FileInputStream(arq);
 			//chama metodo pra enviar string solicitando lista
-			clientSocket = new DatagramSocket();
-			localPorta = clientSocket.getLocalPort();
+			DatagramSocket clientSocket = new DatagramSocket();
+			int localPorta = clientSocket.getLocalPort();
 			
-			System.out.println("-----------"+localPorta);
+			System.out.println("porta 50040 - "+porta);
+			
 			server.criarPacote(clientSocket, fis, IP, porta);
 
 			//chamar metodo pra receber o arquivo serializado

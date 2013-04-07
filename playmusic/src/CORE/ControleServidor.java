@@ -31,9 +31,13 @@ public class ControleServidor extends Thread{
 		while (true){
 			try {
 				serverSocket = new DatagramSocket(porta);
-				receive = src.receber(serverSocket, porta, InetAddress.getByName("localhost"));
+				
+				System.out.println(this.porta);
+				
+				receive = src.receber(serverSocket, porta, InetAddress.getByName("localhost"));				
 				BufferedReader br = new BufferedReader(new FileReader(receive.getFilenam()));
 				teste = br.readLine();
+				br.close();
 			} catch (IOException e) {}
 			if (teste.length() > 4 && teste.substring(teste.length()-4, teste.length()).equals(".mp3")){
 				s.enviarMusica(teste, serverSocket.getInetAddress(), serverSocket.getPort());

@@ -20,12 +20,12 @@ public class main {
 		try {
 			c = new Cliente("C:/Users/Toinho/Desktop/Recebidos", InetAddress.getByName("localhost"));
 		} catch (UnknownHostException e) {}
-		
+
 		Vector<Mp3> lista = c.solicitarlista();
 		System.out.println(lista.get(1).getNome());
 
-//		c.Download("she wolf.mp3");
-		//c.Download("03 - try.mp3");
+		//		c.Download("she wolf.mp3");
+		//		c.Download("03 - try.mp3");
 
 
 		//		try{
@@ -36,11 +36,11 @@ public class main {
 		//			System.out.println(i.get_album()+" - "+i.get_author()+" - "+i.get_title());
 		//			while (true){
 		//				f = b.readLine();
-		//				i.pause();
+		//				System.out.println(i.get_volumeAtual());
 		//				f = b.readLine();
-		//				//i.seek(Integer.parseInt(f));
+		//				System.out.println(i.get_minimo());
 		//				i.play(file);
-		//				
+		//
 		//				System.out.println(f);
 		//			}
 		//		}catch (IOException e){

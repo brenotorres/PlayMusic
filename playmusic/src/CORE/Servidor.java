@@ -50,11 +50,6 @@ public class Servidor extends Thread{
 					out.close();
 					FileInputStream fis = new FileInputStream(arq);
 					DatagramSocket clientSocket = new DatagramSocket();
-
-
-					System.out.println(receive.getPortFont()+"      "+receive.getIPfont());
-
-
 					server.criarPacote(clientSocket, fis, receive.getIPfont(), receive.getPortFont());
 					waitClient(50040);
 				}

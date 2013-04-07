@@ -44,7 +44,7 @@ public class SRclient {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		InetAddress IPAddress = IP;
 		// checar depois
-		serverSocket.setSoTimeout(1000000000);
+		serverSocket.setSoTimeout(0);
 		System.out.println("Waiting for data...");
 
 		byte[] dadosrecebidos = new byte[1003];
@@ -137,11 +137,9 @@ public class SRclient {
 		fos.write(ByteUtils.subbytes(arquivoComLixo, 0, lastpos));
 		fos.close();
 		serverSocket.close();
+		clientSocket.close();
 
 		return teste;
-
-
-
 	}
 
 

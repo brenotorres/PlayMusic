@@ -7,7 +7,7 @@ public class retorno {
 	InetAddress IPfont;
 	int portFont;
 	File filenam;
-	
+
 	public retorno(InetAddress IPfonte, int portFonte, File filename){
 		IPfont = IPfonte;
 		portFont = portFonte;
@@ -37,8 +37,4 @@ public class retorno {
 	public void setFilenam(File filenam) {
 		this.filenam = filenam;
 	}
-	
-	
-	
-	
 }

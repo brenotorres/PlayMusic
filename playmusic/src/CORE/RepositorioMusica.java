@@ -17,12 +17,44 @@ public class RepositorioMusica {
 	private Map mapa;
 	private String nomeDiretorio;
 
+	private String[] id3v1genres = { "Blues",
+			"Classic Rock", "Country", "Dance", "Disco", "Funk", "Grunge",
+			"Hip-Hop", "Jazz", "Metal", "New Age", "Oldies", "Other", "Pop",
+			"R&B", "Rap", "Reggae", "Rock", "Techno", "Industrial", "Alternative",
+			"Ska", "Death Metal", "Pranks", "Soundtrack", "Euro-Techno",
+			"Ambient", "Trip-Hop", "Vocal", "Jazz+Funk", "Fusion", "Trance",
+			"Classical", "Instrumental", "Acid", "House", "Game", "Sound Clip",
+			"Gospel", "Noise", "AlternRock", "Bass", "Soul", "Punk", "Space",
+			"Meditative", "Instrumental Pop", "Instrumental Rock", "Ethnic",
+			"Gothic", "Darkwave", "Techno-Industrial", "Electronic", "Pop-Folk",
+			"Eurodance", "Dream", "Southern Rock", "Comedy", "Cult", "Gangsta",
+			"Top 40", "Christian Rap", "Pop/Funk", "Jungle", "Native American",
+			"Cabaret", "New Wave", "Psychadelic", "Rave", "Showtunes", "Trailer",
+			"Lo-Fi", "Tribal", "Acid Punk", "Acid Jazz", "Polka", "Retro",
+			"Musical", "Rock & Roll", "Hard Rock", "Folk", "Folk-Rock",
+			"National Folk", "Swing", "Fast Fusion", "Bebob", "Latin", "Revival",
+			"Celtic", "Bluegrass", "Avantgarde", "Gothic Rock",
+			"Progressive Rock", "Psychedelic Rock", "Symphonic Rock", "Slow Rock",
+			"Big Band", "Chorus", "Easy Listening", "Acoustic", "Humour",
+			"Speech", "Chanson", "Opera", "Chamber Music", "Sonata", "Symphony",
+			"Booty Brass", "Primus", "Porn Groove", "Satire", "Slow Jam", "Club",
+			"Tango", "Samba", "Folklore", "Ballad", "Power Ballad",
+			"Rhythmic Soul", "Freestyle", "Duet", "Punk Rock", "Drum Solo",
+			"A Capela", "Euro-House", "Dance Hall", "Goa", "Drum & Bass",
+			"Club-House", "Hardcore", "Terror", "Indie", "BritPop", "Negerpunk",
+			"Polsk Punk", "Beat", "Christian Gangsta Rap", "Heavy Metal",
+			"Black Metal", "Crossover", "Contemporary Christian",
+			"Christian Rock", "Merengue", "Salsa", "Thrash Metal", "Anime",
+			"JPop", "SynthPop"												
+	};
+
+
 	public RepositorioMusica(String diretorio){
 		this.diretorio = new File(diretorio);
 		this.nomeDiretorio = diretorio;
 	}
 
-	protected Vector<Mp3> gerarLista() throws UnsupportedAudioFileException, IOException{
+	public Vector<Mp3> gerarLista() throws UnsupportedAudioFileException, IOException{
 		lista = new Vector<Mp3>();
 		File arquivos[] = diretorio.listFiles();
 		Mp3 temp;
@@ -34,7 +66,14 @@ public class RepositorioMusica {
 			temp = new Mp3();
 			temp.setAutor((String)mapa.get("author"));
 			temp.setAlbum((String)mapa.get("album"));
-			temp.setGenero((String)mapa.get("id3v1genres"));
+			String a = (String) mapa.get("mp3.id3tag.genre");
+			if(a != null && a.charAt(0)=='('&& a.charAt(a.length()-1)==')'){
+				String semparen = a.substring(1,a.length()-1);
+				int numerogenero = Integer.parseInt(semparen); 
+				temp.setGenero(id3v1genres[numerogenero]);
+			}else{
+				temp.setGenero(a);
+			}
 			temp.setTitulo((String)mapa.get("title"));
 			temp.setNome(arquivos[i].getName());
 			temp.setTamanho("" + arquivos[i].length());
@@ -66,7 +105,7 @@ public class RepositorioMusica {
 		}
 		return arquivo;
 	}
-	
+
 	public File procurarMusica(String musica) throws UnsupportedAudioFileException, IOException{
 		File arquivo = null;
 		boolean encontrou = false;
@@ -80,7 +119,7 @@ public class RepositorioMusica {
 		}
 		return arquivo;
 	}
-	
+
 	public int getIndice(String musica){
 		int indice = -1;
 		boolean encontrou = false;
@@ -92,7 +131,7 @@ public class RepositorioMusica {
 		}
 		return indice;
 	}
-	
+
 	public void adicionarMusica(String arquivo) throws UnsupportedAudioFileException, IOException{
 		//Copiar arquivo pra pasta
 		Mp3 temp = new Mp3();
@@ -101,7 +140,14 @@ public class RepositorioMusica {
 		mapa = ((AudioFileFormat)audioFileFormat).properties();
 		temp.setAutor((String)mapa.get("author"));
 		temp.setAlbum((String)mapa.get("album"));
-		temp.setGenero((String)mapa.get("id3v1genres"));
+		String a = (String) mapa.get("mp3.id3tag.genre");
+		if(a.charAt(0)=='('&& a.charAt(a.length()-1)==')'){
+			String semparen = a.substring(1,a.length()-1);
+			int numerogenero = Integer.parseInt(semparen); 
+			temp.setGenero(id3v1genres[numerogenero]);
+		}else{
+			temp.setGenero(a);
+		}
 		temp.setTitulo((String)mapa.get("title"));
 		temp.setNome((String)mapa.get(arq.getName()));
 		temp.setTamanho("" + arq.length());
@@ -114,7 +160,7 @@ public class RepositorioMusica {
 
 		lista.addElement(temp);
 	}
-	
+
 	public void removerMusica(String arquivo){
 		//Remover musica da pasta
 		int indice = getIndice(arquivo);

@@ -24,4 +24,8 @@ public interface interfacePlayer {
     
     float get_minimo();
     
+	float get_volumeAtual();
+
+	long Microseconds();
+	
 }

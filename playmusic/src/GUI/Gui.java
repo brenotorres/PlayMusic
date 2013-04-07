@@ -19,17 +19,21 @@ import CORE.RepositorioMusica;
 import CORE.interfacePlayer;
 import CORE.RepositorioMusica;
 
+import com.sun.corba.se.spi.orbutil.fsm.Action;
 import com.sun.glass.events.KeyEvent;
 import com.sun.javafx.geom.Rectangle;
 import com.sun.webpane.platform.ContextMenu;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Point3D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ContentDisplay;
@@ -222,13 +226,14 @@ public class Gui extends Application {
 	Node Menuplayer(){
 		HBox hbox = new HBox();
 		hbox.setSpacing(5);
-
-		volume.setMaxWidth(50); 
+		
+		volume.setMaxWidth(100); 
 		volume.setShowTickLabels(false); // 10
 		volume.setShowTickMarks(false); // 11
 		volume.setTranslateY(volume.getTranslateY()+17);
-
-
+		volume.setMin(-80.0);
+		volume.setMax(6.0206);
+		volume.setValue(-10);
 		//deslizante.setTooltip(new Tooltip("O controle deslizante tem um valor numérico de acordo com sua posição"));
 
 		final Image iplay = new Image(getClass().getResourceAsStream("play.png"));
@@ -255,7 +260,11 @@ public class Gui extends Application {
 		botMute.setStyle("-fx-base: transparent;");
 		botMute.setFocusTraversable(false);
 
-
+		volume.valueProperty().addListener(new ChangeListener<Number>() {
+			public void changed(ObservableValue<? extends Number> ov, Number old_v, Number new_v){
+				i.set_volume(new_v.longValue());
+			}
+		});
 
 		botPlay.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -264,12 +273,10 @@ public class Gui extends Application {
 					System.out.println(((Mp3)table.getSelectionModel().getSelectedItem()).getNome());
 					File f = new File(diretorio+((Mp3)table.getSelectionModel().getSelectedItem()).getNome());
 					i.play(f);
-					System.out.println(i.get_minimo());
-					botPlay.setGraphic(new ImageView(ipause));
-					System.out.println(i.get_volumeAtual());
-					retornoMute = i.get_volumeAtual();
-					volume.setMin(i.get_minimo());
-					volume.setMax(i.get_maximo());
+					i.set_volume((float)volume.getValue());
+					//System.out.println(i.get_minimo());
+					//while(i.get_maximo()==i.get_minimo()){}
+					botPlay.setGraphic(new ImageView(ipause));					
 					state = PLAYING;					
 				}else{
 					i.pause();
@@ -300,11 +307,12 @@ public class Gui extends Application {
 						mute = false;
 						i.set_volume(retornoMute);
 						botMute.setGraphic( new ImageView(ifone) );
-
+						volume.setValue(retornoMute);
 					}else{
 						mute = true;
 						retornoMute = i.get_volumeAtual();
 						i.set_volume(i.get_minimo());
+						volume.setValue(i.get_minimo());
 						botMute.setGraphic( new ImageView(imute) );
 					}
 				}	

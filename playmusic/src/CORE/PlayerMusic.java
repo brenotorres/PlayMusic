@@ -293,7 +293,6 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 
 	protected void volumeControl(){
 		if ( (line != null) && (line.isControlSupported(FloatControl.Type.MASTER_GAIN))){
-			System.out.println("AQUI PORRA!");
 			gainControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
 			controleVolume = true;
 		}else{

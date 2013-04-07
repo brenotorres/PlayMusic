@@ -18,7 +18,7 @@ public class SRserver {
 	public static SortedSet<Short> semAckSequencia = new TreeSet<Short>();
 	public static TreeMap <Short,DatagramPacket> pacotes = new TreeMap<Short,DatagramPacket>();
 	
-	public void criarPacote(FileInputStream fis,InetAddress IPAddress,int port) throws IOException {
+	public void criarPacote(DatagramSocket clientSocket, FileInputStream fis,InetAddress IPAddress,int port) throws IOException {
 		
 		//basicos
 			System.out.println("Sending in progress!");
@@ -27,10 +27,13 @@ public class SRserver {
 			janela = 7;
 			
 			
-			if (port==1) ackPort = port++; //criando uma porta para ack 
-			else ackPort = port--;	
+			if (port==1){ 
+				ackPort = port + 1; //criando uma porta para ack 
+			}else{
+				ackPort = port - 1;	
+			}
 			
-			clientSocket = new DatagramSocket();
+			
 			
 			
 	        byte[] pacote = new byte[1003];
@@ -143,16 +146,16 @@ public class SRserver {
 	
 	public static void main(String args[]) throws Exception {
 		
-		FileInputStream fis = new FileInputStream("teste1");  
+		FileInputStream fis = new FileInputStream("Foto.zip");  
 		InetAddress IPAddress = InetAddress.getByName("localhost");	
 		int port = 2000;	
 		
 		
 		SRserver breno = new SRserver();
-		
+		clientSocket = new DatagramSocket();
 		//String teste =  breno.receberString(port);
 		//System.out.println(teste);
-		breno.criarPacote(fis, IPAddress, port);	
+		breno.criarPacote(clientSocket,fis, IPAddress, port);	
 			
 			
 		}

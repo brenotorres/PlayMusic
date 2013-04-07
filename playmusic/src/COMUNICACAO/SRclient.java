@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -26,14 +27,17 @@ public class SRclient {
 	 ArrayList <DatagramPacket> acks = new ArrayList<DatagramPacket>();
 	 SortedSet<Short> trackBase=new TreeSet<Short>();
 	 //public static DatagramSocket clientSocketString;
-	public retorno receber(int port,InetAddress IP ) throws IOException{
+	public retorno receber(DatagramSocket serverSocket,int port,InetAddress IP ) throws IOException{
 		int window = 7, ackPort;
 		short base, SeqNo = 0;
 		
-		 if (port==1) ackPort = port++; 
-		 else ackPort = port--;	
+		 if (port==1){
+			 ackPort = port + 1; 
+		 }else {
+			 ackPort = port - 1;	
+		 }
 		
-		DatagramSocket serverSocket = new DatagramSocket(port);
+		
         serverSocket.setReuseAddress(true);
         @SuppressWarnings("resource")
 		DatagramSocket clientSocket = new DatagramSocket();
@@ -152,7 +156,7 @@ public class SRclient {
 	    	
 	}
 	
-	public static void main(String[] args) throws UnknownHostException {
+	public static void main(String[] args) throws UnknownHostException, SocketException {
 		
 		 
 		InetAddress IPAddress = InetAddress.getByName("localhost");	
@@ -160,10 +164,10 @@ public class SRclient {
 		//int ackPort = 2001;	
 		
 		SRclient breno = new SRclient();	
-		
+		DatagramSocket serverSocket = new DatagramSocket(port);
 			retorno breno2 = null;
 			try {
-				breno2 = breno.receber( port , IPAddress);
+				breno2 = breno.receber( serverSocket, port , IPAddress);
 			} catch (IOException e) {
 				
 				e.printStackTrace();

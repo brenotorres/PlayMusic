@@ -240,7 +240,7 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	}
 
 	public void play(File file) {
-		
+
 		if (state == PAUSED){
 			resumeMusic();
 		}else{
@@ -293,6 +293,7 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 
 	protected void volumeControl(){
 		if ( (line != null) && (line.isControlSupported(FloatControl.Type.MASTER_GAIN))){
+			System.out.println("AQUI PORRA!");
 			gainControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
 			controleVolume = true;
 		}else{
@@ -301,7 +302,7 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	}
 
 	public void set_volume(float fa){
-		if(controleVolume&&(fa<get_maximo())&&(fa>get_minimo())){
+		if(controleVolume&&(fa<=get_maximo())&&(fa>=get_minimo())){
 			gainControl.setValue(fa); 
 			//System.out.println("#comeu a bronca"+gainControl.getValue());
 		}else{
@@ -310,11 +311,39 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 		}
 	}
 
+	public float get_volumeAtual(){
+		volumeControl();
+		if(controleVolume)
+			return gainControl.getValue();
+		return 0;
+	}
+
 	public float get_maximo(){
-		return gainControl.getMaximum();
+		if(controleVolume){
+			return gainControl.getMaximum();
+		}else{
+			volumeControl();
+			if(controleVolume){
+				return gainControl.getMaximum();
+			}
+		}
+		return 0;
+
 	}
 
 	public float get_minimo(){
-		return gainControl.getMinimum();
+		if(controleVolume){
+			return gainControl.getMinimum();
+		}else{
+			volumeControl();
+			if(controleVolume){
+				return gainControl.getMinimum();
+			}
+		}
+		return 0;
+	}
+
+	public long Microseconds(){
+		return line.getMicrosecondPosition();
 	}
 }

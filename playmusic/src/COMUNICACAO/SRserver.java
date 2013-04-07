@@ -6,7 +6,7 @@ import java.net.*;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-class SRserver {
+public class SRserver {
 	
 	
 	public static short base;

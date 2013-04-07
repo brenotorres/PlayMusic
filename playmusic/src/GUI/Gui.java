@@ -1,13 +1,25 @@
 package GUI;
 
+
 import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Properties;
+import java.util.Vector;
+
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 import javafx.scene.control.Button;
 
-
+import CORE.Cliente;
+import CORE.Mp3;
 import CORE.PlayerMusic;
+import CORE.RepositorioMusica;
 import CORE.interfacePlayer;
+import CORE.RepositorioMusica;
 
+import com.sun.glass.events.KeyEvent;
 import com.sun.javafx.geom.Rectangle;
 import com.sun.webpane.platform.ContextMenu;
 
@@ -20,6 +32,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -28,10 +41,14 @@ import javafx.scene.control.Skin;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.DragEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -55,7 +72,13 @@ public class Gui extends Application {
 	private boolean mute = false;
 	private float retornoMute;
 	private String ipserver = "null";
-	
+	private String diretorio = "C:/Caja/";
+	private Vector<Mp3> vectorMp3 = new Vector<Mp3>();
+	private Cliente cl;
+	private TableView table = new TableView();
+	private Slider volume = new Slider();
+	final ObservableList<Mp3> data = FXCollections.observableArrayList();
+
 
 	public static void main(String[] args) {
 		launch(); 
@@ -64,26 +87,53 @@ public class Gui extends Application {
 	@Override
 	public void start(final Stage palco) throws Exception { 
 		final VBox raiz = new VBox(10); 
-		final VBox configini = new VBox(10);//configurar o ip "popup"
+		final VBox configini = new VBox(10);
 		cena = new Scene(configini, 300, 100); 
-		
+
 		Label ip = new Label("IP do servidor");
 		final TextField txtIp = new TextField("");
 		txtIp.setTooltip(new Tooltip("Digite o IP do servidor para poder começar a usar o Cajá corretamente"));
-		
 		Button config = new Button("Configurar");
+
 		configini.getChildren().addAll(ip, txtIp, config);
+
 		config.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evento){
+				//try {
 				cena = new Scene(raiz, 600, 400);
 				setIP(txtIp.getText());
-				//retornoMute = i.get_volumeAtual();
 				palco.setScene(cena);
 				palco.show();
+				//					InetAddress ip;
+				//					ip = InetAddress.getByName(txtIp.getText());
+				//					cl = new Cliente(diretorio, ip) ;
+				//					vectorMp3 = cl.solicitarlista();
+
+				RepositorioMusica a = new RepositorioMusica(diretorio);
+				try {
+					vectorMp3 = a.gerarLista();
+				} catch (UnsupportedAudioFileException | IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				if(!vectorMp3.isEmpty()){
+					System.out.println("HEREERE");
+					int i = 0;
+					while(i<vectorMp3.size()){
+						data.add(vectorMp3.get(i));
+						i++;
+					}
+				}
+				//				} catch (UnknownHostException e) {
+				//					e.printStackTrace();
+				//				}
 			}
 		});
-	
+
+
+
 		Label lblMensagem = new Label(); 
 		lblMensagem.setText("Masoque");
 		Font font = new Font(100);
@@ -105,7 +155,7 @@ public class Gui extends Application {
 		tab2.setText("Download");
 		tab2.setContent(lblMensagem);
 		tab2.setClosable(false);
-		
+
 		Tab tab3 = new Tab();
 		tab3.setText("Configurações");
 		tab3.setContent(Config());
@@ -122,20 +172,33 @@ public class Gui extends Application {
 
 
 	private Pane Player1() {
-		VBox border = new VBox();
 
-		ListView<String> lvList = new ListView<String>(); 
-		ObservableList<String> items = FXCollections.observableArrayList (
-				"Musica1 - ", "Musica2 - artista");
-		lvList.setItems(items);	
+		VBox vbox = new VBox();
+		table.setEditable(true);
 
-		//lvList.setMaxHeight(Control.USE_PREF_SIZE);
-		lvList.setPrefWidth(cena.getWidth());
+		TableColumn musicCol = new TableColumn("Música");
+		musicCol.setPrefWidth(150);
+		musicCol.getWidth();
+		musicCol.setCellValueFactory(new PropertyValueFactory<Mp3, String>("nome"));
 
-		//border. setLeft(lvList);
+		TableColumn albumCol = new TableColumn("Álbum");
+		albumCol.setPrefWidth(150);
+		albumCol.setCellValueFactory(new PropertyValueFactory<Mp3, String>("album"));
+
+		TableColumn artistaCol = new TableColumn("Artista");
+		artistaCol.setPrefWidth(150);
+		artistaCol.setCellValueFactory(new PropertyValueFactory<Mp3, String>("autor"));
+
+		TableColumn generoCol = new TableColumn("Gênero");
+		generoCol.setPrefWidth(150);
+		generoCol.setCellValueFactory(new PropertyValueFactory<Mp3, String>("genero"));
+
+		table.getColumns().addAll(musicCol, albumCol, artistaCol, generoCol);
+
+		table.setItems(data);
+
+
 		Separator separadorHorizontal = new Separator();
-		//border.setCenter(separadorHorizontal);
-		//border.setBottom(Menuplayer());
 
 		Slider deslizante = new Slider(); // 9
 		deslizante.setMaxWidth(590);
@@ -143,29 +206,29 @@ public class Gui extends Application {
 		deslizante.setShowTickLabels(false); // 10
 		deslizante.setShowTickMarks(false); // 11
 		//deslizante.setTooltip(new Tooltip("O controle deslizante tem um valor numérico de acordo com sua posição"));
-		
-		border.getChildren().addAll(lvList, separadorHorizontal, deslizante, Menuplayer());
-		
+
+		vbox.getChildren().addAll(table, separadorHorizontal, deslizante, Menuplayer());
+
 		//border.setBottom(butao);
 		//butao.setOnAction();
 		//border.setBottom.()
 		//border.setRight(createButtonColumn());  
 		//border.setBottom(createButtonRow());  // Uses a tile pane for sizing
 		//border.setBottom(createButtonBox());  // Uses an HBox, no sizing 
-		
-		return border;
+
+		return vbox;
 	}
 
 	Node Menuplayer(){
 		HBox hbox = new HBox();
 		hbox.setSpacing(5);
 
-		Slider volume = new Slider(); // 9
-		volume.setMaxWidth(50);
-		volume.setMin(4); 
+		volume.setMaxWidth(50); 
 		volume.setShowTickLabels(false); // 10
 		volume.setShowTickMarks(false); // 11
-		volume.setRotate(337);
+		volume.setTranslateY(volume.getTranslateY()+17);
+
+
 		//deslizante.setTooltip(new Tooltip("O controle deslizante tem um valor numérico de acordo com sua posição"));
 
 		final Image iplay = new Image(getClass().getResourceAsStream("play.png"));
@@ -173,26 +236,41 @@ public class Gui extends Application {
 		final Image ifone = new Image(getClass().getResourceAsStream("fone.png"));
 		final Image istop = new Image(getClass().getResourceAsStream("stop.png"));
 		final Image imute = new Image(getClass().getResourceAsStream("mute.png"));
-		
+
 		final Button botPlay = new Button(); 	
 		final Button botPause = new Button();
 		final Button botStop = new Button();
 		final Button botMute = new Button();
 
 		botPlay.setGraphic(new ImageView(iplay));
+		botPlay.setContentDisplay(ContentDisplay.CENTER);
 		botPause.setGraphic(new ImageView(ipause));
 		botStop.setGraphic(new ImageView(istop));
 		botMute.setGraphic(new ImageView(ifone));
+
+		botPlay.setStyle("-fx-base: transparent; ");//deixar transparente
+		botPlay.setFocusTraversable(false);//tirar borda
+		botStop.setStyle("-fx-base: transparent;");
+		botStop.setFocusTraversable(false);
+		botMute.setStyle("-fx-base: transparent;");
+		botMute.setFocusTraversable(false);
+
+
 
 		botPlay.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evento) {
 				if(state != PLAYING){
-					File f = new File("Manguetown.mp3");
+					System.out.println(((Mp3)table.getSelectionModel().getSelectedItem()).getNome());
+					File f = new File(diretorio+((Mp3)table.getSelectionModel().getSelectedItem()).getNome());
 					i.play(f);
-					state = PLAYING;					
+					System.out.println(i.get_minimo());
 					botPlay.setGraphic(new ImageView(ipause));
+					System.out.println(i.get_volumeAtual());
 					retornoMute = i.get_volumeAtual();
+					volume.setMin(i.get_minimo());
+					volume.setMax(i.get_maximo());
+					state = PLAYING;					
 				}else{
 					i.pause();
 					state = PAUSED;
@@ -217,20 +295,23 @@ public class Gui extends Application {
 		botMute.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle (ActionEvent evento){
-				if(mute){
-					mute = false;
-					i.set_volume(retornoMute);
-					botMute.setGraphic( new ImageView(ifone) );
-					
-				}else{
-					mute = true;
-					retornoMute = i.get_volumeAtual();
-					i.set_volume(i.get_minimo());
-					botMute.setGraphic( new ImageView(imute) );
-				}
-			}		
+				if(state == PLAYING||state == PAUSED){	
+					if(mute){
+						mute = false;
+						i.set_volume(retornoMute);
+						botMute.setGraphic( new ImageView(ifone) );
+
+					}else{
+						mute = true;
+						retornoMute = i.get_volumeAtual();
+						i.set_volume(i.get_minimo());
+						botMute.setGraphic( new ImageView(imute) );
+					}
+				}	
+			}
 		});
 		
+
 		hbox.setSpacing(10);
 		hbox.getChildren().addAll(botPlay, botStop, botMute, volume);
 		return hbox;
@@ -239,52 +320,52 @@ public class Gui extends Application {
 	private Node Config(){
 		VBox vbox = new VBox();
 		//vbox.setSpacing(10);
-		
+
 		Label ip = new Label("IP do servidor");
 		Label barran = new Label("\n\n");
 		Label Diretorio = new Label("Diretorio de download");
 		final TextField txtIp = new TextField(getIP());
 		txtIp.setTooltip(new Tooltip("Digite o IP do servidor para poder começar a usar o Cajá corretamente"));
-		
+
 		txtIp.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evento){
 				txtIp.clear();
 			}
 		});
-		
-		final TextField txtDiretorio = new TextField("C:\\Caja Player");
+
+		final TextField txtDiretorio = new TextField(diretorio);
 		txtDiretorio.setTooltip(new Tooltip("Diretorio de onde as músicas serão salvas "));
 		final Label configurado = new Label("\nConfigurado com sucesso!");
 		configurado.setTextFill(Color.web("#0076a3"));
 		configurado.setVisible(false);
-		
-		
+
+
 		Button config = new Button("Configurar");
 		config.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evento){
 				configurado.setVisible(true);
-				
+
 				setIP(txtIp.getText());
 				System.out.println(txtIp.getText());
-				
+
 				//adicionar mais coisas
 			}
 		});
-		
+
 		vbox.getChildren().addAll(ip, txtIp, Diretorio, txtDiretorio, configurado, config);
-		
+
 		return vbox;
 	}
-	
+
 	void setIP(String k){
 		this.ipserver = k;
 	}
-	
+
 	String getIP(){
 		System.out.println(this.ipserver);
 		return this.ipserver;
 	}
-	
+
 }

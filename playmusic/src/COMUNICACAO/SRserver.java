@@ -141,7 +141,7 @@ public class SRserver {
 
 	public static void main(String args[]) throws Exception {
 
-		FileInputStream fis = new FileInputStream("teste1");
+		FileInputStream fis = new FileInputStream("teste3");
 		InetAddress IPAddress = InetAddress.getByName("localhost");
 		int port = 2000;
 

@@ -7,7 +7,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 
 public class ackThread extends Thread {
-
+	//teste
 	//private static int DEBUG = Sender4.DEBUG;
 	private short ultimoAck;
 	private DatagramSocket serverSocket;
@@ -55,7 +55,7 @@ public class ackThread extends Thread {
 					SRserver.setBase(SRserver.seqFirst()); //isso faz a base caminhar
 					System.out.println("Setou " +sequenciaAtual+ " como a nova base");
 				}
-
+				
 
 				//tratando para ultimo ACK
 

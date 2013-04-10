@@ -343,6 +343,11 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	}
 
 	public long Microseconds(){
-		return line.getMicrosecondPosition();
+		if(line!= null){
+			return line.getMicrosecondPosition()/1000000;
+		}else{
+			return 0;
+		}
+			
 	}
 }

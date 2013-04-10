@@ -1,6 +1,5 @@
 package GUI;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -22,9 +21,14 @@ import CORE.RepositorioMusica;
 import com.sun.corba.se.spi.orbutil.fsm.Action;
 import com.sun.glass.events.KeyEvent;
 import com.sun.javafx.geom.Rectangle;
+import com.sun.org.apache.regexp.internal.recompile;
 import com.sun.webpane.platform.ContextMenu;
 
 import javafx.application.Application;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.LongPropertyBase;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -34,6 +38,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point3D;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ContentDisplay;
@@ -62,10 +67,15 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
+import jfxtras.labs.scene.control.window.CloseIcon;
+import jfxtras.labs.scene.control.window.MinimizeIcon;
+import jfxtras.labs.scene.control.window.Window;
+
 
 public class Gui extends Application {
-
-	private interfacePlayer i = new PlayerMusic();
+	
+	public static boolean tre = false;
+	public static interfacePlayer i = new PlayerMusic();
 	private Scene cena ;
 	private int state = UNKNOWN;	
 	private static final int UNKNOWN = -1;
@@ -79,20 +89,29 @@ public class Gui extends Application {
 	private String diretorio = "C:/Caja/";
 	private Vector<Mp3> vectorMp3 = new Vector<Mp3>();
 	private Cliente cl;
-	private TableView table = new TableView();
+	static TableView table = new TableView();
+	private TableView playlist = new TableView();
 	private Slider volume = new Slider();
+	final Slider reproducao = new Slider(); // 9
+	private TableView tabledown = new TableView();
+	private File f;
 	final ObservableList<Mp3> data = FXCollections.observableArrayList();
-
-
+	public static LongPropertyBase a;
+	public boolean thread = false;
+	//static Thread repro = new Reproducao();
+	
 	public static void main(String[] args) {
 		launch(); 
 	}
 
+
 	@Override
 	public void start(final Stage palco) throws Exception { 
+		palco.getIcons().add(new Image("caja.png"));
 		final VBox raiz = new VBox(10); 
 		final VBox configini = new VBox(10);
 		cena = new Scene(configini, 300, 100); 
+		cena.setFill(Color.valueOf("transparent"));//escolher a cor....
 
 		Label ip = new Label("IP do servidor");
 		final TextField txtIp = new TextField("");
@@ -107,12 +126,9 @@ public class Gui extends Application {
 				//try {
 				cena = new Scene(raiz, 600, 400);
 				setIP(txtIp.getText());
+
 				palco.setScene(cena);
 				palco.show();
-				//					InetAddress ip;
-				//					ip = InetAddress.getByName(txtIp.getText());
-				//					cl = new Cliente(diretorio, ip) ;
-				//					vectorMp3 = cl.solicitarlista();
 
 				RepositorioMusica a = new RepositorioMusica(diretorio);
 				try {
@@ -138,11 +154,11 @@ public class Gui extends Application {
 
 
 
-		Label lblMensagem = new Label(); 
-		lblMensagem.setText("Masoque");
-		Font font = new Font(100);
-		lblMensagem.setFont(font);
-		lblMensagem.setLayoutY(500);
+		//		Label lblMensagem = new Label(); 
+		//		lblMensagem.setText("Masoque");
+		//		Font font = new Font(100);
+		//		lblMensagem.setFont(font);
+		//		lblMensagem.setLayoutY(500);
 
 		//Separador para ver se deixa organizado
 		Separator separadorHorizontal = new Separator(); // 7
@@ -157,7 +173,7 @@ public class Gui extends Application {
 
 		Tab tab2 = new Tab();
 		tab2.setText("Download");
-		tab2.setContent(lblMensagem);
+		tab2.setContent(DownloadTab());
 		tab2.setClosable(false);
 
 		Tab tab3 = new Tab();
@@ -165,7 +181,12 @@ public class Gui extends Application {
 		tab3.setContent(Config());
 		tab3.setClosable(false);
 
-		tabPane.getTabs().addAll(tab, tab2, tab3);
+		Tab tab4 = new Tab();
+		tab4.setText("Playlists");
+		tab4.setContent(Playlists());
+		tab4.setClosable(false);
+
+		tabPane.getTabs().addAll(tab, tab2, tab3, tab4);
 		raiz.getChildren().add(tabPane);
 
 		palco.setTitle("Cajá player"); // 9
@@ -173,6 +194,8 @@ public class Gui extends Application {
 		palco.show(); // 1
 
 	}
+
+
 
 
 	private Pane Player1() {
@@ -204,14 +227,41 @@ public class Gui extends Application {
 
 		Separator separadorHorizontal = new Separator();
 
-		Slider deslizante = new Slider(); // 9
-		deslizante.setMaxWidth(590);
-		deslizante.setMin(0); 
-		deslizante.setShowTickLabels(false); // 10
-		deslizante.setShowTickMarks(false); // 11
-		//deslizante.setTooltip(new Tooltip("O controle deslizante tem um valor numérico de acordo com sua posição"));
+		reproducao.setMaxWidth(590);
+		reproducao.setMin(0); 
+		reproducao.setMax(10);
+		reproducao.setShowTickLabels(false); // 10
+		reproducao.setShowTickMarks(false); // 11
+		//reproducao.setTooltip(new Tooltip("O controle deslizante tem um valor numérico de acordo com sua posição"));
 
-		vbox.getChildren().addAll(table, separadorHorizontal, deslizante, Menuplayer());
+		a = new LongPropertyBase() {
+
+			@Override
+			public String getName() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Object getBean() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
+
+		a.addListener(new ChangeListener<Number>() {
+			public void changed(ObservableValue<? extends Number> ov, Number old_v, Number new_v){
+				System.out.println("NEW"+new_v);
+				reproducao.setValue( Double.parseDouble(""+new_v));
+//				try {
+//					repro.sleep(10);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+			}
+		});
+		vbox.getChildren().addAll( table, separadorHorizontal, reproducao, Menuplayer());
 
 		//border.setBottom(butao);
 		//butao.setOnAction();
@@ -226,7 +276,7 @@ public class Gui extends Application {
 	Node Menuplayer(){
 		HBox hbox = new HBox();
 		hbox.setSpacing(5);
-		
+
 		volume.setMaxWidth(100); 
 		volume.setShowTickLabels(false); // 10
 		volume.setShowTickMarks(false); // 11
@@ -271,9 +321,27 @@ public class Gui extends Application {
 			public void handle(ActionEvent evento) {
 				if(state != PLAYING){
 					System.out.println(((Mp3)table.getSelectionModel().getSelectedItem()).getNome());
-					File f = new File(diretorio+((Mp3)table.getSelectionModel().getSelectedItem()).getNome());
+					f = new File(diretorio+((Mp3)table.getSelectionModel().getSelectedItem()).getNome());
 					i.play(f);
 					i.set_volume((float)volume.getValue());
+					String t = ((Mp3)table.getSelectionModel().getSelectedItem()).getTempo();
+					int index = 0;
+					for( ; t.charAt(index) != ':' ; index++ ){}
+					double tempo;
+					tempo = Double.parseDouble(t.substring(0, index)) * 60 + Double.parseDouble(t.substring(0, index)) ;
+					thread = true;
+					reproducao.setMax(tempo);
+					tre = true;
+					RpprMain as = new RpprMain();			
+					
+					
+					//as.run();
+					//repro.run();
+					//while(index < 10){
+					//a.set(i.Microseconds());
+					//a.set(i.Microseconds());
+					//index++;
+					//}
 					//System.out.println(i.get_minimo());
 					//while(i.get_maximo()==i.get_minimo()){}
 					botPlay.setGraphic(new ImageView(ipause));					
@@ -318,7 +386,7 @@ public class Gui extends Application {
 				}	
 			}
 		});
-		
+
 
 		hbox.setSpacing(10);
 		hbox.getChildren().addAll(botPlay, botStop, botMute, volume);
@@ -375,5 +443,63 @@ public class Gui extends Application {
 		System.out.println(this.ipserver);
 		return this.ipserver;
 	}
+	public Node DownloadTab(){
+		VBox vbox = new VBox(20);
 
+		TableColumn musicCol = new TableColumn("Música");
+		musicCol.setPrefWidth(150);
+		musicCol.getWidth();
+		musicCol.setCellValueFactory(new PropertyValueFactory<Mp3, String>("nome"));
+
+		TableColumn artistaCol = new TableColumn("Artista");
+		artistaCol.setPrefWidth(150);
+		artistaCol.setCellValueFactory(new PropertyValueFactory<Mp3, String>("autor"));
+
+		TableColumn TamanhoCol = new TableColumn("Tamanho (KBytes)");
+		TamanhoCol.setPrefWidth(150);
+		TamanhoCol.setCellValueFactory(new PropertyValueFactory<Mp3, String>("tamanho"));
+
+		TableColumn VelocidadeCol = new TableColumn("Velocidade");
+		VelocidadeCol.setPrefWidth(150);
+
+		TableColumn EstadoCol = new TableColumn("Estado");
+		EstadoCol.setPrefWidth(150);
+
+		tabledown.getColumns().addAll(musicCol, artistaCol, TamanhoCol, VelocidadeCol, EstadoCol);
+
+		HBox hbox = new HBox(10);
+
+		Button BaixarPause = new Button("BaixarPause PROCURAR ICONE");
+		Button Parar = new Button("Parar PROCURAR ICONE");
+		Button Recomecar = new Button("Recomecar PROCURAR ICONE");
+
+		hbox.getChildren().addAll(BaixarPause, Parar, Recomecar);
+		//passar aqui a lista de arquivos vinda do servidor.
+		//table.setItems(data);
+
+		vbox.getChildren().addAll(tabledown, hbox);
+		return vbox;
+	}
+
+	private Node Playlists() {
+		//		TableColumn playl = new TableColumn("Playlist");
+		//		playl.setPrefWidth(150);
+		//		playl.setCellValueFactory(new PropertyValueFactory<Mp3, String>("nome"));
+		//		
+		//		playlist.getColumns().add(playl);
+		//		playlist.setItems(data);
+		//		
+		//		//Group k = new Group();
+		//		Window w = new Window("Playlist");
+		//		w.setLayoutX(10);
+		//		w.setLayoutY(10);
+		//        w.setPrefSize(100, 500);
+		//        w.getLeftIcons().add(new CloseIcon(w));
+		//        w.getLeftIcons().add(new MinimizeIcon(w));
+		//        w.getContentPane().getChildren().add(playlist);
+		//        
+		//		return w;
+		return null;
+	}
 }
+

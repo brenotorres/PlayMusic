@@ -62,8 +62,8 @@ public class ackThread extends Thread {
 				if(sequenciaAtual==ultimoAck){
 					if(SRserver.isSeqEmpty()){
 						esperar1= false;
-						SRserver.esperar = false;
-						SRclient.waiting = false;
+						//SRserver.esperar = false;
+						//SRclient.waiting = false;
 					}
 				
 				}
@@ -71,8 +71,9 @@ public class ackThread extends Thread {
 			}
 
 		}
-		serverSocket.close();
 		System.out.println("thread ack acabou aqui!");
+		serverSocket.close();
+		
 	}
 
 	public static boolean ackContains(short c) {

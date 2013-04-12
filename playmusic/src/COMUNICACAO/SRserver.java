@@ -75,21 +75,29 @@ public class SRserver {
 		proximo = 1;
 
 		while(esperar) {
+			if(semAckSequencia.isEmpty()){
+				esperar = false;
+			}
+			
 			while(proximo<base+janela) {
 				if(pacotes.get(proximo) != null) {
-					if(proximo==4){
+					
 
-					}else{
+					
 						clientSocket.send(pacotes.get(proximo));
-					}
+					
 					// start a Timer thread for this packet
 					new Thread(new timerThread(proximo)).start();
 					//if(DEBUG > 0) System.out.println("Active timer threads: "+(Thread.activeCount() - 3));
 				}
 				proximo++;
 			}
+			
+			
 		}
+		//tratar para re-envio em acks pequenos
 
+		
 
 		clientSocket.close();
 	}

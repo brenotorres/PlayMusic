@@ -26,6 +26,7 @@ public class SRclient {
 	TreeMap <Short,byte[]> pacotes = new TreeMap<Short,byte[]>();
 	ArrayList <DatagramPacket> acks = new ArrayList<DatagramPacket>();
 	SortedSet<Short> trackBase=new TreeSet<Short>();
+	int valor, aux;
 	//public static DatagramSocket clientSocketString;
 	public retorno receber(DatagramSocket serverSocket,int port,InetAddress IP ) throws IOException{
 		int window = 7, ackPort;
@@ -48,7 +49,7 @@ public class SRclient {
 		System.out.println("Waiting for data...");
 
 		byte[] dadosrecebidos = new byte[1003];
-		boolean waiting=true;
+		//boolean waiting=true;
 		byte[] buffer = new byte[1000];
 		byte[] ACK = new byte[5];
 
@@ -79,11 +80,32 @@ public class SRclient {
 
 				portFonte = receivePacket.getPort();
 				IPfonte = receivePacket.getAddress();
+				
+				
+				//Modulo especial
+				byte[] test = new byte[2];
+				test[0] = buffer[0];
+				test[1] = buffer[1];
+				aux = ByteUtils.convertShortFromBytes(test);
+				valor = 1 + (int) (Math.random()*100);
+				//
 			}
 			catch(SocketTimeoutException e) {
 				waiting = false;
 				continue;
 			}
+			
+			
+			
+			
+			// modulo especial
+			if( valor < 50 ){ //em vez de 60 , pegar o valor do CORE (vindo da GUI) 
+				System.out.println("pacote " + aux + " perdido");
+			}else{
+			//
+				
+				
+				
 			serverSocket.setSoTimeout(1000);
 			byte[] seq = new byte[2];
 			seq[0] = buffer[0];
@@ -110,6 +132,7 @@ public class SRclient {
 				tmp[1] = acks.get(SeqNo).getData()[1];
 				System.out.println("ACK "+ByteUtils.convertShortFromBytes(tmp));
 				continue;
+			}
 			}
 		}
 

@@ -23,14 +23,18 @@ import java.util.TreeSet;
 public class SRclient {
 	public volatile static boolean waiting=true;
 	//public static int DEBUG = 2;
-	TreeMap <Short,byte[]> pacotes = new TreeMap<Short,byte[]>();
-	ArrayList <DatagramPacket> acks = new ArrayList<DatagramPacket>();
-	SortedSet<Short> trackBase=new TreeSet<Short>();
+//	TreeMap <Short,byte[]> pacotes = new TreeMap<Short,byte[]>();
+//	ArrayList <DatagramPacket> acks = new ArrayList<DatagramPacket>();
+//	SortedSet<Short> trackBase=new TreeSet<Short>();
 	int valor, aux;
 	//public static DatagramSocket clientSocketString;
 	public retorno receber(DatagramSocket serverSocket,int port,InetAddress IP ) throws IOException{
 		int window = 7, ackPort;
 		short base, SeqNo = 0;
+		TreeMap <Short,byte[]> pacotes = new TreeMap<Short,byte[]>();
+		ArrayList <DatagramPacket> acks = new ArrayList<DatagramPacket>();
+		SortedSet<Short> trackBase=new TreeSet<Short>();
+		waiting = true;
 
 		if (port==1){
 			ackPort = port + 1;
@@ -53,20 +57,20 @@ public class SRclient {
 		byte[] buffer = new byte[1000];
 		byte[] ACK = new byte[5];
 
-		for(short j=0;j<Short.MAX_VALUE;j++) {
-			ACK[0] = ByteUtils.convertToBytes(j)[0];
-			ACK[1] = ByteUtils.convertToBytes(j)[1];
-			for(int k=0;k<3;k++) {
-				ACK[k+2] = "ACK".getBytes()[k];
-			}
-
-			DatagramPacket ackPacket = new DatagramPacket(ACK, ACK.length, IPAddress, ackPort);
-			acks.add(ackPacket);
-			trackBase.add((short)j);
-			ACK = new byte[5];
-		}
-		trackBase.remove((short)0);
-		base = 1;
+//		for(short j=0;j<Short.MAX_VALUE;j++) {
+//			ACK[0] = ByteUtils.convertToBytes(j)[0];
+//			ACK[1] = ByteUtils.convertToBytes(j)[1];
+//			for(int k=0;k<3;k++) {
+//				ACK[k+2] = "ACK".getBytes()[k];
+//			}
+//
+//			DatagramPacket ackPacket = new DatagramPacket(ACK, ACK.length, IPAddress, ackPort);
+//			acks.add(ackPacket);
+//			trackBase.add((short)j);
+//			ACK = new byte[5];
+//		}
+//		trackBase.remove((short)0);
+//		base = 1;
 
 		int portFonte = 0;
 		InetAddress IPfonte = null;
@@ -76,69 +80,93 @@ public class SRclient {
 				serverSocket.receive(receivePacket);
 				System.out.println("awdeasdasdasd "+ receivePacket.getAddress());
 
+				IPAddress = receivePacket.getAddress();
+				System.out.println("------------------"+IPAddress+"        ---");
+				
+				serverSocket.setSoTimeout(1000);
 				buffer = receivePacket.getData();
 
 				portFonte = receivePacket.getPort();
 				IPfonte = receivePacket.getAddress();
-				
-				
+
+
 				//Modulo especial
 				byte[] test = new byte[2];
 				test[0] = buffer[0];
 				test[1] = buffer[1];
 				aux = ByteUtils.convertShortFromBytes(test);
 				valor = 1 + (int) (Math.random()*100);
-				//
 			}
 			catch(SocketTimeoutException e) {
 				waiting = false;
 				continue;
 			}
 			
-			
-			
-			
-			// modulo especial
-			if( valor < 50 ){ //em vez de 60 , pegar o valor do CORE (vindo da GUI) 
-				System.out.println("pacote " + aux + " perdido");
-			}else{
-			//
-				
-				
-				
-			serverSocket.setSoTimeout(1000);
-			byte[] seq = new byte[2];
-			seq[0] = buffer[0];
-			seq[1] = buffer[1];
-			SeqNo = ByteUtils.convertShortFromBytes(seq);
-			System.out.println("Received "+SeqNo);
-			if ((SeqNo >= base) && (SeqNo <= (base+window-1))){
-				pacotes.put(SeqNo, ByteUtils.subbytes(buffer, 2, 1002));
-				clientSocket.send(acks.get(SeqNo));
-				byte tmp[] = new byte[2];
-				tmp[0] = acks.get(SeqNo).getData()[0];
-				tmp[1] = acks.get(SeqNo).getData()[1];
-				System.out.println("ACK "+ByteUtils.convertShortFromBytes(tmp));
-				trackBase.remove(SeqNo);
-				if (base == SeqNo) {
-					base = trackBase.first();
+			for(short j=0;j<Short.MAX_VALUE;j++) {
+				ACK[0] = ByteUtils.convertToBytes(j)[0];
+				ACK[1] = ByteUtils.convertToBytes(j)[1];
+				for(int k=0;k<3;k++) {
+					ACK[k+2] = "ACK".getBytes()[k];
 				}
-				continue;
+
+				DatagramPacket ackPacket = new DatagramPacket(ACK, ACK.length, IPAddress, ackPort);
+				acks.add(ackPacket);
+				trackBase.add((short)j);
+				ACK = new byte[5];
 			}
-			if((SeqNo >= (base - window)) && (SeqNo <= base - 1)) {
-				clientSocket.send(acks.get(SeqNo));
-				byte tmp[] = new byte[2];
-				tmp[0] = acks.get(SeqNo).getData()[0];
-				tmp[1] = acks.get(SeqNo).getData()[1];
-				System.out.println("ACK "+ByteUtils.convertShortFromBytes(tmp));
-				continue;
-			}
+			trackBase.remove((short)0);
+			base = 1;
+
+
+
+
+			// modulo especial
+			if( valor < 0 ){ //em vez de 60 , pegar o valor do CORE (vindo da GUI)
+				System.out.println("pacote " + aux + " perdido");
+				dadosrecebidos = new byte[1003];
+				buffer = new byte[1000];
+			}else{
+				//
+
+
+
+
+				byte[] seq = new byte[2];
+				seq[0] = buffer[0];
+				seq[1] = buffer[1];
+				SeqNo = ByteUtils.convertShortFromBytes(seq);
+				System.out.println("Received "+SeqNo);
+				if ((SeqNo >= base) && (SeqNo <= (base+window-1))){
+					pacotes.put(SeqNo, ByteUtils.subbytes(buffer, 2, 1002));
+					clientSocket.send(acks.get(SeqNo));
+					byte tmp[] = new byte[2];
+					tmp[0] = acks.get(SeqNo).getData()[0];
+					tmp[1] = acks.get(SeqNo).getData()[1];
+					System.out.println("ACK "+ByteUtils.convertShortFromBytes(tmp));
+					trackBase.remove(SeqNo);
+					if (base == SeqNo) {
+						base = trackBase.first();
+					}
+					continue;
+				}
+				if((SeqNo >= (base - window)) && (SeqNo <= base - 1)) {
+					clientSocket.send(acks.get(SeqNo));
+					byte tmp[] = new byte[2];
+					tmp[0] = acks.get(SeqNo).getData()[0];
+					tmp[1] = acks.get(SeqNo).getData()[1];
+					System.out.println("ACK "+ByteUtils.convertShortFromBytes(tmp));
+					continue;
+				}
+				dadosrecebidos = new byte[1003];
+				buffer = new byte[1000];
 			}
 		}
 
-		for(short z=0;z<pacotes.lastKey()+1;z++) {
-			byte parse[] = pacotes.get(z);
-			if(parse!=null) bos.write(parse,0,parse.length);
+		if (!pacotes.isEmpty()){
+			for(short z=0;z<pacotes.lastKey()+1;z++) {
+				byte parse[] = pacotes.get(z);
+				if(parse!=null) bos.write(parse,0,parse.length);
+			}
 		}
 
 

@@ -77,7 +77,7 @@ public class RepositorioMusica {
 			temp.setTitulo((String)mapa.get("title"));
 			temp.setNome(arquivos[i].getName());
 			temp.setTamanho("" + arquivos[i].length());
-			microseconds = (long)mapa.get("duration");
+			microseconds = Long.parseLong((String)""+mapa.get("duration"));
 			int mili = (int) (microseconds / 1000);
 			int sec = (mili / 1000) % 60;
 			int min = (mili / 1000) / 60;
@@ -151,7 +151,7 @@ public class RepositorioMusica {
 		temp.setTitulo((String)mapa.get("title"));
 		temp.setNome((String)mapa.get(arq.getName()));
 		temp.setTamanho("" + arq.length());
-		long microseconds = (long)mapa.get("duration");
+		long microseconds = Long.parseLong((String)""+mapa.get("duration"));
 		int mili = (int) (microseconds / 1000);
 		int sec = (mili / 1000) % 60;
 		int min = (mili / 1000) / 60;

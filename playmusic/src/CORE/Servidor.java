@@ -31,28 +31,25 @@ public class Servidor extends Thread{
 	}
 
 	public void run(){
-		retorno receive;
+		retorno receive = null;
 		String teste = "";
 		while(true){
 			try {
 				DatagramSocket serverSocket = new DatagramSocket(5000);
+
+				System.out.println("Servidor espera conexão");
 				receive = client.receber(serverSocket, 5000, InetAddress.getByName("localhost"));
+				System.out.println("      --------------"+receive.getFilenam().length());
 				BufferedReader br = new BufferedReader(new FileReader(receive.getFilenam()));
 				teste = br.readLine();
-				if (teste.equals("porta")){
+				System.out.println(teste);
+				if (teste != null && teste.equals("porta")){
 					//Tem que checar portas UDP disponiveis
-					String porta = "50040";
-					File arq = new File("string");
-					//arq.delete();
-					arq.createNewFile();
-					BufferedWriter out = new BufferedWriter(new FileWriter(arq));
-					out.write(porta);
-					out.close();
-					FileInputStream fis = new FileInputStream(arq);
-					DatagramSocket clientSocket = new DatagramSocket();
-					server.criarPacote(clientSocket, fis, receive.getIPfont(), receive.getPortFont());
-					waitClient(50040);
+					System.out.println(receive.getIPfont()+" "+receive.getPortFont());
+					waitClient(50040, receive.getIPfont(), receive.getPortFont());
 				}
+				receive = null;
+				teste = "";
 			} catch (IOException e) {}
 		}
 	}
@@ -67,8 +64,8 @@ public class Servidor extends Thread{
 		}
 	}
 
-	public void waitClient(int porta){
-		Thread controle = new ControleServidor(this, server, client, porta);
+	public void waitClient(int porta, InetAddress IPdestino, int portaDestino){
+		Thread controle = new ControleServidor(this, server, client, porta, IPdestino, portaDestino);
 		controle.start();
 	}
 

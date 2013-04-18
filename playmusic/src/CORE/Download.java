@@ -10,6 +10,7 @@ import java.net.InetAddress;
 
 import COMUNICACAO.SRclient;
 import COMUNICACAO.SRserver;
+import COMUNICACAO.retorno;
 
 public class Download extends Thread{
 
@@ -25,21 +26,32 @@ public class Download extends Thread{
 		this.IP = IP;
 		this.porta = porta;
 		this.musica = musica;
+		
+		System.out.println("download");
 	}
 
 	public void run(){
+		retorno receive = null;
+		int portaLocal;
 		//Chama metodo que envia a string
 		try {
 			DatagramSocket clientSocket = new DatagramSocket();
+			portaLocal = clientSocket.getLocalPort();
 			File arq = new File("string");
 			arq.delete();
 			arq.createNewFile();
 			BufferedWriter out = new BufferedWriter(new FileWriter(arq));
 			out.write(musica);
+			out.close();
 			FileInputStream fis = new FileInputStream(arq);
+			//synchronized (this) {
 			server.criarPacote(clientSocket, fis, IP, porta);
 			//Chama metodo para receber o arquivo
-			client.receber(clientSocket, clientSocket.getLocalPort(), IP);
+			DatagramSocket serverSocket = new DatagramSocket(portaLocal);
+			System.out.println("MANTEGOSO");
+			receive = client.receber(serverSocket, portaLocal, IP);
+			
+			//}
 		} catch (IOException e) {}
 	}
 }

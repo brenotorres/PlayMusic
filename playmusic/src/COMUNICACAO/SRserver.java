@@ -12,6 +12,7 @@ public class SRserver {
 	public static short base;
 	public static int DEBUG = 1;
 	public volatile static boolean esperar = true;
+	public volatile static boolean pause = false;
 	public static short janela;
 	final public static int timeout = 500;
 	public static DatagramSocket clientSocket;
@@ -25,6 +26,9 @@ public class SRserver {
 		short seqNo=0, proximo;
 		int ackPort;
 		janela = 7;
+		esperar = true;
+		semAckSequencia.clear();
+		pacotes.clear();
 
 
 		if (port==1){
@@ -66,7 +70,7 @@ public class SRserver {
 			}
 		} catch (IOException ex) { }
 
-		
+
 		Thread ackThread = new Thread(new ackThread(ackPort, pacotes.lastKey(), timeout));
 		ackThread.start();
 		ackThread.setPriority(Thread.MAX_PRIORITY-1);
@@ -75,29 +79,38 @@ public class SRserver {
 		proximo = 1;
 
 		while(esperar) {
+						
 			if(semAckSequencia.isEmpty()){
 				esperar = false;
 			}
-			
-			while(proximo<base+janela) {
-				if(pacotes.get(proximo) != null) {
-					
 
+			while(proximo<base+janela) {
+				//System.out.println(proximo);
+				if(pacotes.get(proximo) != null) {
+
+					while(pause){
+
+					}
+
+					clientSocket.send(pacotes.get(proximo));
 					
-						clientSocket.send(pacotes.get(proximo));
+					byte[] temp = new byte[2];
 					
+					temp[0] = pacotes.get(proximo).getData()[0];
+					temp[1] = pacotes.get(proximo).getData()[1];
+					System.out.println(ByteUtils.convertShortFromBytes(temp));
 					// start a Timer thread for this packet
 					new Thread(new timerThread(proximo)).start();
 					//if(DEBUG > 0) System.out.println("Active timer threads: "+(Thread.activeCount() - 3));
 				}
 				proximo++;
 			}
-			
-			
+
+
 		}
 		//tratar para re-envio em acks pequenos
 
-		
+
 
 		clientSocket.close();
 	}
@@ -137,6 +150,9 @@ public class SRserver {
 	}
 	public static synchronized short getBase() {
 		return base;
+	}
+	public static void setPause(boolean entrada){
+		pause = entrada;
 	}
 	public static synchronized void sendPacket(DatagramPacket p) {
 		try {

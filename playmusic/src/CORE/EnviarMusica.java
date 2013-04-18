@@ -34,6 +34,8 @@ public class EnviarMusica extends Thread {
 			
 			DatagramSocket clientSocket = new DatagramSocket();
 			FileInputStream fis = new FileInputStream(arquivo);
+			
+			System.out.println("Enviando Musica, endereço: "+arquivo.getPath());
 			s.criarPacote(clientSocket, fis, IP, porta);
 			
 		} catch (UnsupportedAudioFileException e) {}

@@ -13,12 +13,12 @@ public class ackThread extends Thread {
 	private DatagramSocket serverSocket;
 	private boolean esperar1 = true;
 	public static volatile ArrayList<Short> ackRecebido = new ArrayList<Short>();
-	
-	
 
- 
-	
-	
+
+
+
+
+
 	public void run() {
 		byte[] ack = new byte[5];
 
@@ -36,9 +36,9 @@ public class ackThread extends Thread {
 
 
 			sequenciaAck[0] = ack[0];
-			sequenciaAck[1]	= ack[1];
+			sequenciaAck[1] = ack[1];
 
-			short sequenciaAtual = ByteUtils.convertShortFromBytes(sequenciaAck);	 
+			short sequenciaAtual = ByteUtils.convertShortFromBytes(sequenciaAck);
 
 
 			short b = SRserver.getBase();
@@ -55,7 +55,7 @@ public class ackThread extends Thread {
 					SRserver.setBase(SRserver.seqFirst()); //isso faz a base caminhar
 					System.out.println("Setou " +sequenciaAtual+ " como a nova base");
 				}
-				
+
 
 				//tratando para ultimo ACK
 
@@ -65,7 +65,7 @@ public class ackThread extends Thread {
 						//SRserver.esperar = false;
 						//SRclient.waiting = false;
 					}
-				
+
 				}
 
 			}
@@ -73,7 +73,7 @@ public class ackThread extends Thread {
 		}
 		System.out.println("thread ack acabou aqui!");
 		serverSocket.close();
-		
+
 	}
 
 	public static boolean ackContains(short c) {

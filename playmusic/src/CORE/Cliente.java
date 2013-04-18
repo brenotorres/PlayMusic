@@ -37,7 +37,7 @@ public class Cliente{
 		IniciarRepositorio();
 		IniciarConexao();
 	}
-	
+
 	public void IniciarConexao(){
 		//Envia pro servidor uma solicitação de porta pra se conectar
 		DatagramSocket clientSocket;
@@ -51,10 +51,14 @@ public class Cliente{
 			out.write("porta");
 			out.close();
 			FileInputStream fis = new FileInputStream(arq);
+
+			System.out.println("Cliente envia solicitação de conexão");
 			server.criarPacote(clientSocket, fis, IP, 5000);
 
 			//Recebe a porta qua vai ouvir os comandos do cliente
 			clientSocket = new DatagramSocket(localPorta);
+
+			System.out.println("Cliente espera numero de porta");
 			retorno receive = client.receber(clientSocket, localPorta, IP);
 			BufferedReader br = new BufferedReader(new FileReader(receive.getFilenam()));
 			porta = Integer.parseInt(br.readLine());
@@ -84,14 +88,16 @@ public class Cliente{
 			//chama metodo pra enviar string solicitando lista
 			DatagramSocket clientSocket = new DatagramSocket();
 			int localPorta = clientSocket.getLocalPort();
-			
-			System.out.println("porta 50040 - "+porta);
-			
+
+			System.out.println("Cliente envia comando, pela porta: "+porta);
 			server.criarPacote(clientSocket, fis, IP, porta);
 
 			//chamar metodo pra receber o arquivo serializado
 			clientSocket = new DatagramSocket(localPorta);
+
+			System.out.println("Cliente espera lista de musicas");
 			retorno r = client.receber(clientSocket, localPorta, IP);
+			
 			File arquivo = r.getFilenam();
 
 			FileInputStream fileStream = new FileInputStream(arquivo);   //Vai receber do metodo

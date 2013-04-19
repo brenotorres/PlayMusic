@@ -10,7 +10,7 @@ public interface interfacePlayer {
     
     void stop();
     
-    void seek(int sec);
+    void seek(long sec);
     
     String get_album();
     

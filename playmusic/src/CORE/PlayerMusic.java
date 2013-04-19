@@ -25,7 +25,7 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 	private AudioFileFormat baseFileFormat = null;
 	private String author;
 	private String title;
-	private String album; 
+	private String album;
 
 
 	private FloatControl gainControl;
@@ -155,43 +155,43 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 		}
 	}
 
-	//	public void run() {
-	//		try {
-	//			byte[] data = new byte[4096];
-	//			DataLine.Info info = new DataLine.Info(SourceDataLine.class, decodedFormat);
-	//			line = (SourceDataLine) AudioSystem.getLine(info);
-	//			line.open(decodedFormat);
-	//			if (line != null){
-	//				volumeControl();
-	//				// Start
-	//				state = PLAYING;
-	//				line.start();
-	//				synchronized (audioin){
-	//					int nBytesRead = 0;
-	//					while (nBytesRead != -1 && state != STOPPED){
-	//						nBytesRead = audioin.read(data, 0, data.length);
-	//						if (nBytesRead != -1 && line != null){
-	//							line.write(data, 0, nBytesRead);
-	//						}
-	//						while(state == PAUSED || state == SEEKING){}
-	//					}
-	//					// Stop
-	//					if (line != null){
-	//						state = UNKNOWN;
-	//						line.drain();
-	//						line.stop();
-	//						line.close();
-	//						line = null;
-	//						closeStream();
-	//					}
-	//				}
-	//			}
-	//		} catch (LineUnavailableException e) {
-	//			erro = true;
-	//		} catch (IOException e) {
-	//			erro = true;
-	//		}
-	//	}
+	// public void run() {
+	// try {
+	// byte[] data = new byte[4096];
+	// DataLine.Info info = new DataLine.Info(SourceDataLine.class, decodedFormat);
+	// line = (SourceDataLine) AudioSystem.getLine(info);
+	// line.open(decodedFormat);
+	// if (line != null){
+	// volumeControl();
+	// // Start
+	// state = PLAYING;
+	// line.start();
+	// synchronized (audioin){
+	// int nBytesRead = 0;
+	// while (nBytesRead != -1 && state != STOPPED){
+	// nBytesRead = audioin.read(data, 0, data.length);
+	// if (nBytesRead != -1 && line != null){
+	// line.write(data, 0, nBytesRead);
+	// }
+	// while(state == PAUSED || state == SEEKING){}
+	// }
+	// // Stop
+	// if (line != null){
+	// state = UNKNOWN;
+	// line.drain();
+	// line.stop();
+	// line.close();
+	// line = null;
+	// closeStream();
+	// }
+	// }
+	// }
+	// } catch (LineUnavailableException e) {
+	// erro = true;
+	// } catch (IOException e) {
+	// erro = true;
+	// }
+	// }
 
 	public void run() {
 		try {
@@ -281,7 +281,7 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 		return author;
 	}
 
-	public void seek(int sec){
+	public void seek(long sec){
 		stopMusic();
 		line = null;
 		System.out.println("Entrou agora!");
@@ -302,7 +302,7 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 
 	public void set_volume(float fa){
 		if(controleVolume&&(fa<=get_maximo())&&(fa>=get_minimo())){
-			gainControl.setValue(fa); 
+			gainControl.setValue(fa);
 			//System.out.println("#comeu a bronca"+gainControl.getValue());
 		}else{
 			volumeControl();
@@ -348,6 +348,8 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 		}else{
 			return 0;
 		}
-			
+
 	}
+
+	
 }

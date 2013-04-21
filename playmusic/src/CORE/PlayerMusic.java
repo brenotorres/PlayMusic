@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import javafx.scene.media.Media;
+
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -310,11 +312,12 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 		}
 	}
 
-	public float get_volumeAtual(){
+	public double get_volumeAtual(){
 		volumeControl();
 		if(controleVolume)
-			return gainControl.getValue();
+		//	return gainControl.getValue();
 		return 0;
+		return state;
 	}
 
 	public float get_maximo(){
@@ -330,16 +333,16 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 
 	}
 
-	public float get_minimo(){
-		if(controleVolume){
-			return gainControl.getMinimum();
-		}else{
-			volumeControl();
-			if(controleVolume){
-				return gainControl.getMinimum();
-			}
-		}
-		return 0;
+	public double get_minimo(){
+//		if(controleVolume){
+//			return gainControl.getMinimum();
+//		}else{
+//			volumeControl();
+//			if(controleVolume){
+//				return gainControl.getMinimum();
+//			}
+//		}
+		return 0.0;
 	}
 
 	public long Microseconds(){
@@ -349,6 +352,42 @@ public class PlayerMusic implements interfacePlayer, Runnable{
 			return 0;
 		}
 
+	}
+
+	@Override
+	public void play(Media file) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void seek(double sec) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void set_volume(double f) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public long get_Tempo() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void mute(boolean mute) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void reproducao() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

@@ -1,63 +1,52 @@
 package GUI;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Map.Entry;
-import java.io.File;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Properties;
-import java.util.Vector;
 
-import javax.sound.sampled.UnsupportedAudioFileException;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
+import javafx.util.Duration;
 
-import sun.awt.AWTAccessor.MenuAccessor;
-import sun.awt.image.PixelConverter.Bgrx;
-import sun.reflect.generics.tree.BottomSignature;
-
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 
-import CORE.Cliente;
-import CORE.Mp3;
-import CORE.PlayerMusic;
-import CORE.RepositorioMusica;
-import CORE.interfacePlayer;
-import CORE.RepositorioMusica;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 
-import com.sun.corba.se.spi.orbutil.fsm.Action;
-import com.sun.glass.events.KeyEvent;
-import com.sun.javafx.geom.Rectangle;
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
-import com.sun.org.apache.regexp.internal.recompile;
-import com.sun.webpane.platform.ContextMenu;
-import com.sun.xml.internal.ws.api.pipe.NextAction;
+import javafx.event.ActionEvent;
+import javafx.scene.media.MediaPlayer.Status;
+//import javafx.scene.paint.Color;
+import javafx.event.EventHandler;
+
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;import java.io.File;
+import java.io.IOException;
+import java.util.Vector;
+import javafx.scene.media.Media;
 
 import javafx.application.Application;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongPropertyBase;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.geometry.Point3D;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Control;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
-import javafx.scene.control.Skin;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -68,20 +57,45 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.DragEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Circle;
-import javafx.scene.text.Font;
-import javafx.stage.Stage;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
+import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import javax.sound.sampled.UnsupportedAudioFileException;
+
+import com.sun.glass.events.MouseEvent;
+
+import CORE.Cliente;
+import CORE.Mp3;
+import CORE.PlayerJavaFX;
+import CORE.PlayerMusic;
+import CORE.RepositorioMusica;
+import CORE.interfacePlayer;
+
+//import javafx.scene.paint.Color;
+//import com.sun.media.jfxmedia.MediaPlayer;
+
 
 
 public class Gui extends Application {
+
+
+	PlayerJavaFX player;
+	private MediaView mediaView;
+	private final boolean repeat = false;
+	private boolean stopRequested = false;
+	private boolean atEndOfMedia = false;
+	private Label playTime;
+	private Label playTimep;
+	Slider volumep = new Slider();
+	Slider reproducaop = new Slider(); // 9
+
 
 	public double tempo;
 	public  long seek=0;
@@ -112,9 +126,10 @@ public class Gui extends Application {
 	private Label bx;
 	final ObservableList<Mp3> datagenero = FXCollections.observableArrayList();
 	final ObservableList<Mp3> dataArtista = FXCollections.observableArrayList();
-	private Menu menuGen = new Menu("Genêro");
+	private Menu menuGen = new Menu("Gênero");
 	private Menu menuArtist = new Menu("Artista");
 	private Menu menuCustons = new Menu("Customizadas");
+	private boolean teste = true;
 
 	//static Thread repro = new Reproducao();
 
@@ -124,7 +139,8 @@ public class Gui extends Application {
 
 
 	@Override
-	public void start(final Stage palco) throws Exception { 
+	public void start(final Stage palco) throws Exception {
+
 		palco.getIcons().add(new Image("caja.png"));
 		final VBox raiz = new VBox(10); 
 		final VBox configini = new VBox(10);
@@ -138,11 +154,16 @@ public class Gui extends Application {
 		Button config = new Button("Configurar");
 
 		configini.getChildren().addAll(ip, txtIp, config);
-		
+
 		config.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evento){
 				//cena = new Scene(raiz, 800, 600);
+				//Player player = new Player(mp);
+				//Media m = new Media(null);
+				//mp = new MediaPlayer(m);
+
+				player = new PlayerJavaFX();
 				cena.setRoot(raiz);
 				palco.setWidth(800);
 				palco.setHeight(600);
@@ -153,7 +174,7 @@ public class Gui extends Application {
 				playlist.prefHeightProperty().bind(cena.heightProperty());
 				table.prefWidthProperty().bind(cena.widthProperty());
 				table.prefHeightProperty().bind(cena.heightProperty());
-				
+
 				System.out.println(table.heightProperty());
 				table.prefHeight(500);
 				palco.setScene(cena);
@@ -221,7 +242,13 @@ public class Gui extends Application {
 
 		//HBox linharepro = new HBox();
 		VBox vbox = new VBox();
+
 		table.setEditable(true);
+
+		playTime = new Label();
+		playTime.setPrefWidth(130);
+		playTime.setMinWidth(50);	
+
 
 		TableColumn musicCol = new TableColumn("Música");
 
@@ -245,24 +272,21 @@ public class Gui extends Application {
 
 		Separator separadorHorizontal = new Separator();
 
-		reproducao.setMin(0); 
-		reproducao.setMaxWidth(700);
-		reproducao.setMax(10);
+		reproducao.setMin(0);
+		reproducao.setMaxWidth(Double.MAX_VALUE);
+		reproducao.prefWidthProperty().bind(cena.widthProperty());
 		reproducao.setShowTickLabels(false); // 10
 		reproducao.setShowTickMarks(false); // 11
-		reproducao.valueProperty().addListener(new ChangeListener<Number>() {
+		//		reproducao.setPrefWidth(130);
+		//		reproducao.setMinWidth(100);	
 
-			public void changed(ObservableValue<? extends Number> ov, Number old_v, Number new_v){
-				if(state == PLAYING){
-					if( (new_v.longValue() > old_v.longValue()+2) || (new_v.longValue() < old_v.longValue()-2)  ){
-						state = SEEKING;
-						System.out.println(new_v.longValue()+ "novo valor ");
-						seek = new_v.longValue();
-						System.out.println("LISTENER");
-						i.seek(new_v.longValue());
-						state = PLAYING;
-					}
-
+		reproducao.valueProperty().addListener(new InvalidationListener() {
+			public void invalidated(Observable ov) {
+				if (reproducao.isValueChanging()) {
+					System.out.println(Math.floor(reproducao.getValue())+"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbb");
+					player.seek(Math.floor(reproducao.getValue()));
+					//player.seek(10);
+					updateValues();
 				}
 			}
 		});
@@ -288,7 +312,10 @@ public class Gui extends Application {
 			}
 		});
 
-		vbox.getChildren().addAll( table, separadorHorizontal, reproducao, Menuplayer());
+		HBox rep= new HBox();
+		playTime.setText("--:--/--:--");
+		rep.getChildren().addAll(reproducao, playTime);
+		vbox.getChildren().addAll( table, separadorHorizontal, rep, Menuplayer());
 
 		//border.setBottom(butao);
 		//butao.setOnAction();
@@ -302,15 +329,14 @@ public class Gui extends Application {
 
 	Node Menuplayer(){
 		HBox hbox = new HBox();
-		hbox.setSpacing(5);
 
 		volume.setMaxWidth(100); 
 		volume.setShowTickLabels(false); // 10
 		volume.setShowTickMarks(false); // 11
 		volume.setTranslateY(volume.getTranslateY()+17);
-		volume.setMin(-80.0);
-		volume.setMax(6.0206);
-		volume.setValue(-10);
+		volume.setMin(0);
+		volume.setMax(1);
+		volume.setValue(0.7);
 		//deslizante.setTooltip(new Tooltip("O controle deslizante tem um valor numérico de acordo com sua posição"));
 
 		final Image iplay = new Image(getClass().getResourceAsStream("play.png"));
@@ -336,65 +362,67 @@ public class Gui extends Application {
 		botStop.setFocusTraversable(false);
 		botMute.setStyle("-fx-base: transparent;");
 		botMute.setFocusTraversable(false);
-
+		
 		volume.valueProperty().addListener(new ChangeListener<Number>() {
 			public void changed(ObservableValue<? extends Number> ov, Number old_v, Number new_v){
-				i.set_volume(new_v.longValue());
+				player.set_volume(new_v.doubleValue());
+				if(new_v.doubleValue()==0.0){	
+					botMute.setGraphic(new ImageView(imute));
+				}else{
+					botMute.setGraphic(new ImageView(ifone));
+				}
 			}
 		});
+
 
 		botPlay.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evento) {
 				if(state != PLAYING){
-					seek = 0;
+					if(!teste){
+						player.stop();
+						teste = true;
+					}
+					state = PLAYING;
 					Mp3 o = ((Mp3)table.getSelectionModel().getSelectedItem());
-					System.out.println(((Mp3)table.getSelectionModel().getSelectedItem()).getNome());
-					f = new File(diretorio+((Mp3)table.getSelectionModel().getSelectedItem()).getNome());
-					i.play(f);
+					f = new File(diretorio+o.getNome());
+					Media m = new Media(f.toURI().toString());
+					player.play(m);
+					player.play(m);
+					player.pause();
+					player.play(m);
 					vectorMp3.get(vectorMp3.indexOf(o)).incremeta();
-					i.set_volume((float)volume.getValue());
-					String t = ((Mp3)table.getSelectionModel().getSelectedItem()).getTempo();
-					int index = 0;
-					for( ; t.charAt(index) != ':' ; index++ ){}
-					tempo = Double.parseDouble(t.substring(0, index)) * 60 + Double.parseDouble(t.substring(index+1)) ;
-					thread = true;
-					reproducao.setMax(tempo);
-					System.out.println("TEMPO GUI"+tempo);
-					tre = true;
-					RpprMain as = new RpprMain();			
+					reproducao.setValue(0.0);
+					botPlay.setGraphic(new ImageView(ipause));
 
-					//as.run();
-					//repro.run();
-					//while(index < 10){
-					//a.set(i.Microseconds());
-					//a.set(i.Microseconds());
-					//index++;
-					//}
-					//System.out.println(i.get_minimo());
-					//while(i.get_maximo()==i.get_minimo()){}
-					botPlay.setGraphic(new ImageView(ipause));					
-					state = PLAYING;					
+					player.mp.currentTimeProperty().addListener(new InvalidationListener() {
+						public void invalidated(Observable ov) {
+							updateValues();
+						}
+					});
+
 				}else{
-					i.pause();
 					state = PAUSED;
+					player.pause();
 					botPlay.setGraphic(new ImageView(iplay));
 				}
+
 			}
 		});
+
+
 
 		botStop.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evento){
-				if(state==PLAYING||state==PAUSED){
-					i.stop();
-				}
-				if(state==PLAYING){
+				player.stop();
+				reproducao.setValue(0);
+				if(state == PLAYING){
 					botPlay.setGraphic(new ImageView(iplay));
+					state = STOPPED;
 				}
-				state=STOPPED;
-			}
-		});
+			}});
+
 
 		botMute.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -402,24 +430,79 @@ public class Gui extends Application {
 				if(state == PLAYING||state == PAUSED){	
 					if(mute){
 						mute = false;
-						i.set_volume(retornoMute);
+						volume.setValue(player.get_volumeAtual());
+						player.mute(mute);
 						botMute.setGraphic( new ImageView(ifone) );
-						volume.setValue(retornoMute);
 					}else{
 						mute = true;
-						retornoMute = i.get_volumeAtual();
-						i.set_volume(i.get_minimo());
-						volume.setValue(i.get_minimo());
+						player.mute(mute);
+						volume.setValue(player.get_minimo());
 						botMute.setGraphic( new ImageView(imute) );
 					}
 				}	
 			}
 		});
 
-
-		hbox.setSpacing(10);
+		hbox.setSpacing(11);
 		hbox.getChildren().addAll(botPlay, botStop, botMute, volume);
 		return hbox;
+	}
+
+
+
+	public void updateValues() {
+		if (playTime != null && reproducao != null && volume != null) {
+			Platform.runLater(new Runnable() {
+				@SuppressWarnings("deprecation")
+				public void run() {
+					if(player.mp!=null){
+						Duration currentTime = player.mp.getCurrentTime();
+						playTime.setText(formatTime(currentTime, player.duration));
+						//reproducao.setMax(player.mp.getTotalDuration().toSeconds());						
+						if (!reproducao.isDisabled()&& player.duration.greaterThan(Duration.ZERO) && !reproducao.isValueChanging()) {
+							reproducao.setValue(currentTime.divide(player.duration).toMillis() * 100.0);
+						}
+					}
+				}
+			});
+		}
+	}
+
+	private static String formatTime(Duration elapsed, Duration duration) {
+		int intElapsed = (int) Math.floor(elapsed.toSeconds());
+		int elapsedHours = intElapsed / (60 * 60);
+		if (elapsedHours > 0) {
+			intElapsed -= elapsedHours * 60 * 60;
+		}
+		int elapsedMinutes = intElapsed / 60;
+		int elapsedSeconds = intElapsed - elapsedHours * 60 * 60
+				- elapsedMinutes * 60;
+		if (duration.greaterThan(Duration.ZERO)) {
+			int intDuration = (int) Math.floor(duration.toSeconds());
+			int durationHours = intDuration / (60 * 60);
+			if (durationHours > 0) {
+				intDuration -= durationHours * 60 * 60;
+			}
+			int durationMinutes = intDuration / 60;
+			int durationSeconds = intDuration - durationHours * 60 * 60
+					- durationMinutes * 60;
+			if (durationHours > 0) {
+				return String.format("%d:%02d:%02d/%d:%02d:%02d", elapsedHours,
+						elapsedMinutes, elapsedSeconds, durationHours,
+						durationMinutes, durationSeconds);
+			} else {
+				return String.format("%02d:%02d/%02d:%02d", elapsedMinutes,
+						elapsedSeconds, durationMinutes, durationSeconds);
+			}
+		} else {
+			if (elapsedHours > 0) {
+				return String.format("%d:%02d:%02d", elapsedHours,
+						elapsedMinutes, elapsedSeconds);
+			} else {
+				return String.format("%02d:%02d", elapsedMinutes,
+						elapsedSeconds);
+			}
+		}
 	}
 
 	private Node Config(){
@@ -716,7 +799,7 @@ public class Gui extends Application {
 		playlist.setItems(datatop);
 	}
 
-	
+
 	private Node Playlists() {
 
 		VBox vBox = new VBox(5);
@@ -724,10 +807,10 @@ public class Gui extends Application {
 		playl.setPrefWidth(300);
 		playl.setCellValueFactory(new PropertyValueFactory<Mp3, String>("nome"));
 		playlist.getColumns().add(playl);
-		
+
 		playlist.prefHeightProperty().bind(cena.heightProperty());
 		playlist.prefWidthProperty().bind(cena.widthProperty());
-		
+
 		final Image iplay = new Image(getClass().getResourceAsStream("play.png"));
 		final Image ipause = new Image(getClass().getResourceAsStream("pause.png"));
 		final Image ifone = new Image(getClass().getResourceAsStream("fone.png"));
@@ -765,51 +848,104 @@ public class Gui extends Application {
 
 		botPlay.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle(ActionEvent evento){
-				i.stop();
-
+			public void handle(ActionEvent evento) {
 				if(state != PLAYING){
-					f = new File(diretorio+((Mp3)playlist.getSelectionModel().getSelectedItem()).getNome());
-
-					i.play(f);
-					i.set_volume((float)volume.getValue());
-					String t = ((Mp3)playlist.getSelectionModel().getSelectedItem()).getTempo();
-					int index = 0;
-					for( ; t.charAt(index) != ':' ; index++ ){}
-					tempo = Double.parseDouble(t.substring(0, index)) * 60 + Double.parseDouble(t.substring(index+1)) ;
-					thread = true;
-					reproducao.setMax(tempo);
-					System.out.println("TEMPO GUI"+tempo);
-					tre = true;
-					RpprMain as = new RpprMain();			
-					botPlay.setGraphic(new ImageView(ipause));					
-					state = PLAYING;					
-
-
-					//as.run();
-					//repro.run();
-					//while(index < 10){
-					//a.set(i.Microseconds());
-					//a.set(i.Microseconds());
-					//index++;
-					//}
-					//System.out.println(i.get_minimo());
-					//while(i.get_maximo()==i.get_minimo()){}
+					if(teste){
+						player.stop();
+						teste = false;
+					}
+					state = PLAYING;
+					Mp3 o = ((Mp3)playlist.getSelectionModel().getSelectedItem());
+					f = new File(diretorio+o.getNome());
+					Media m = new Media(f.toURI().toString());
+					player.play(m);
+					player.pause();
+					player.play(m);
+					vectorMp3.get(vectorMp3.indexOf(o)).incremeta();
+					reproducao.setValue(0.0);
+					botPlay.setGraphic(new ImageView(ipause));
+					player.mp.currentTimeProperty().addListener(new InvalidationListener() {
+						public void invalidated(Observable ov) {
+							updateValuesp();
+						}
+					});
 				}else{
-					i.pause();
 					state = PAUSED;
+					player.pause();
 					botPlay.setGraphic(new ImageView(iplay));
 				}
 			}
 		});
 
-		MenuItem mescu = new MenuItem("Menos Escutadas");
+		botStop.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evento){
+				player.stop();
+				reproducao.setValue(0);
+				if(state == PLAYING){
+					botPlay.setGraphic(new ImageView(iplay));
+					state = STOPPED;
+				}
+			}
+		});
+
+		botPro.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evento){
+				//if(state == PLAYING){
+					player.stop();
+					int x = playlist.getSelectionModel().getSelectedIndex();
+					playlist.getSelectionModel().clearAndSelect(x+1);
+					Mp3 o = (Mp3) playlist.getSelectionModel().getSelectedItem();
+					f = new File(diretorio+o.getNome());
+					Media m = new Media(f.toURI().toString());
+					player.play(m);
+					player.pause();
+					player.play(m);
+					vectorMp3.get(vectorMp3.indexOf(o)).incremeta();
+					reproducao.setValue(0.0);
+					botPlay.setGraphic(new ImageView(ipause));
+					player.mp.currentTimeProperty().addListener(new InvalidationListener() {
+						public void invalidated(Observable ov) {
+							updateValuesp();
+						}
+					});
+				//}
+			}
+		});
+
+		botAnt.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent evento){
+				//if(state == PLAYING){
+					player.stop();
+					int x = playlist.getSelectionModel().getSelectedIndex();
+					playlist.getSelectionModel().clearAndSelect(x-1);
+					Mp3 o = (Mp3) playlist.getSelectionModel().getSelectedItem();
+					f = new File(diretorio+o.getNome());
+					Media m = new Media(f.toURI().toString());
+					player.play(m);
+					player.pause();
+					player.play(m);
+					vectorMp3.get(vectorMp3.indexOf(o)).incremeta();
+					reproducao.setValue(0.0);
+					botPlay.setGraphic(new ImageView(ipause));
+					player.mp.currentTimeProperty().addListener(new InvalidationListener() {
+						public void invalidated(Observable ov) {
+							updateValuesp();
+						}
+					});
+				//}
+			}
+		});
+		
+		MenuItem mescu = new MenuItem("Menos Tocadas");
 		MenuItem Top = new MenuItem("Top 10");
 
 		Top.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent evento){
-				Gerarplaytop10();
+				Gerarplaytop10();			
 			}
 		});
 
@@ -819,17 +955,76 @@ public class Gui extends Application {
 				Gerarplaymenosouvidas();
 			}
 		});
-		
-		menuCustons.getItems().addAll( Top, mescu );
 
+		menuCustons.getItems().addAll( Top, mescu );
 		MenuBar menuBar = new MenuBar();
 		menuBar.getMenus().addAll(menuArtist, menuGen, menuCustons);
-		HBox hboxl1 = new HBox();
-		hboxl1.getChildren().addAll(botAnt, botPlay, botPro, botStop, botMute);
+		
+		playTimep = new Label();
+		playTimep.setPrefWidth(150);
+		playTimep.setText("--:--/--:--");
 
-		vBox.getChildren().addAll(menuBar, hboxl1, playlist);
+		reproducaop.setMin(0);
+		reproducaop.setMaxWidth(Double.MAX_VALUE);
+		reproducaop.prefWidthProperty().bind(cena.widthProperty());
+		reproducaop.setShowTickLabels(false); // 10
+		reproducaop.setShowTickMarks(false); // 11
+		reproducaop.valueProperty().addListener(new InvalidationListener() {
+			public void invalidated(Observable ov) {
+				if (reproducaop.isValueChanging()) {
+					player.seek(Math.floor(reproducaop.getValue()));
+					updateValues();
+				}
+			}
+		});
+
+		volumep.setMaxWidth(100); 
+		volumep.setShowTickLabels(false); // 10
+		volumep.setShowTickMarks(false); // 11
+		volumep.setTranslateY(volume.getTranslateY()+4);
+		volumep.setMin(0);
+		volumep.setMax(1);
+		volumep.setValue(0.7);
+		
+		volumep.valueProperty().addListener(new ChangeListener<Number>() {
+			public void changed(ObservableValue<? extends Number> ov, Number old_v, Number new_v){
+				player.set_volume(new_v.doubleValue());
+				if(new_v.doubleValue()==0.0){	
+					botMute.setGraphic(new ImageView(imute));
+				}else{
+					botMute.setGraphic(new ImageView(ifone));
+				}
+			}
+		});
+		
+
+		
+		HBox hboxl1 = new HBox();
+		hboxl1.getChildren().addAll(botAnt, botPlay, botPro, botStop, botMute, volumep);
+		HBox hboxl2 = new HBox();
+		hboxl2.getChildren().addAll(reproducaop, playTimep);
+		
+		vBox.getChildren().addAll(menuBar, hboxl1, hboxl2, playlist);
 
 		return vBox;
 
+	}
+
+	public void updateValuesp() {
+		if (playTimep != null && reproducaop != null && volumep != null) {
+			Platform.runLater(new Runnable() {
+				@SuppressWarnings("deprecation")
+				public void run() {
+					if(player.mp!=null){
+						Duration currentTime = player.mp.getCurrentTime();
+						playTimep.setText(formatTime(currentTime, player.duration));
+						//reproducao.setMax(player.mp.getTotalDuration().toSeconds());						
+						if (!reproducaop.isDisabled()&& player.duration.greaterThan(Duration.ZERO) && !reproducaop.isValueChanging()) {
+							reproducaop.setValue(currentTime.divide(player.duration).toMillis() * 100.0);
+						}
+					}
+				}
+			});
+		}
 	}
 }

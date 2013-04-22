@@ -9,10 +9,10 @@ import java.util.ArrayList;
 public class ackThread extends Thread {
 	//teste
 	//private static int DEBUG = Sender4.DEBUG;
-	private short ultimoAck;
+	private int ultimoAck;
 	private DatagramSocket serverSocket;
 	private boolean esperar1 = true;
-	public static volatile ArrayList<Short> ackRecebido = new ArrayList<Short>();
+	public static volatile ArrayList<Integer> ackRecebido = new ArrayList<Integer>();
 
 
 
@@ -20,29 +20,32 @@ public class ackThread extends Thread {
 
 
 	public void run() {
-		byte[] ack = new byte[5];
-
+		byte[] ack = new byte[7];
+		ackRecebido.clear();
+		
 		while(esperar1){
 			DatagramPacket pacote = new DatagramPacket(ack, ack.length);
 
-
 			try {
 				serverSocket.receive(pacote);
+				System.out.println("chupeta");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
-			byte[] sequenciaAck = new byte[2];
+			byte[] sequenciaAck = new byte[4];
 
 
 			sequenciaAck[0] = ack[0];
 			sequenciaAck[1] = ack[1];
+			sequenciaAck[2] = ack[2];
+			sequenciaAck[3] = ack[3];
+			
+			int sequenciaAtual = Convert.toInt(sequenciaAck);
 
-			short sequenciaAtual = ByteUtils.convertShortFromBytes(sequenciaAck);
+			System.out.println("Sequencia atual de ack " + sequenciaAtual);
 
-
-			short b = SRserver.getBase();
-
+			int b = SRserver.getBase();
 
 
 			if((b<=sequenciaAtual)&& (sequenciaAtual<=(b+SRserver.janela-1))){
@@ -76,13 +79,14 @@ public class ackThread extends Thread {
 
 	}
 
-	public static boolean ackContains(short c) {
+	public static boolean ackContains(int c) {
 		return ackRecebido.contains(c);
 	}
-	public ackThread(int ackPort, short ultimo, int timeout) {
+	public ackThread(DatagramSocket serverSocket, int ultimo, int timeout) {
 		ultimoAck = ultimo;
 		try {
-			serverSocket = new DatagramSocket(ackPort);
+			// serverSocket = new DatagramSocket(ackPort);
+			this.serverSocket = serverSocket;
 			serverSocket.setSoTimeout(0);
 		} catch (SocketException e) {
 			e.printStackTrace();

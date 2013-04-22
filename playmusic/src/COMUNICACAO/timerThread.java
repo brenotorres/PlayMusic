@@ -1,5 +1,7 @@
 package COMUNICACAO;
 
+import java.net.DatagramSocket;
+
 public class timerThread extends Thread {
 
 	protected int checar = 1;
@@ -10,13 +12,16 @@ public class timerThread extends Thread {
 
 	private int tempoPassado;
 
-	private short threadSequencia;
+	private int threadSequencia;
 
 	private boolean running = true;
+	
+	private DatagramSocket clientSocket;
 
-	public timerThread(short sequencia){
+	public timerThread(int sequencia, DatagramSocket clientSocket){
 		Thread.currentThread().setPriority(MIN_PRIORITY);
 
+		this.clientSocket = clientSocket;
 		if(DEBUG > 1) System.out.println("Sending: "+sequencia);
 		threadSequencia = sequencia;
 		tempoPassado = 0;
@@ -63,7 +68,7 @@ public class timerThread extends Thread {
 		synchronized (this) {
 			try {
 				// re-send packet
-				SRserver.clientSocket.send(SRserver.pacotes.get(threadSequencia));
+				clientSocket.send(SRserver.pacotes.get(threadSequencia));
 			} catch (Exception e) {
 				// in case by the time this reaches the timeout, the ACK is received and the clientSocket is closed.
 				System.exit(0);

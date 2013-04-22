@@ -11,8 +11,9 @@ public class Mp3 implements Serializable{
 	private String tamanho;
 	private String tempo;
 	private String titulo;
+	private int contador;
 
-	public Mp3(String nome, String autor, String genero, String album, String tamanho, String tempo, String titulo){
+	public Mp3(String nome, String autor, String genero, String album, String tamanho, String tempo, String titulo, int contador){
 		this.nome = nome;
 		this.autor = autor;
 		this.album = album;
@@ -20,6 +21,7 @@ public class Mp3 implements Serializable{
 		this.tamanho = tamanho;
 		this.tempo = tempo;
 		this.titulo = titulo;
+		this.contador = contador;
 	}
 
 	public Mp3(){
@@ -82,10 +84,24 @@ public class Mp3 implements Serializable{
 		this.tempo = tempo;
 	}
 
+	public int getContador() {
+		return contador;
+	}
+
+	public void setContador(int contador) {
+		this.contador = contador;
+	}
+
+	
 	public String toString() {
 		return "Mp3 [nome=" + nome + ", autor=" + autor + ", genero=" + genero
 				+ ", album=" + album + ", tamanho=" + tamanho + ", tempo="
 				+ tempo + ", titulo=" + titulo + "]";
+	}
+
+	public void incremeta() {
+		this.contador = contador + 1;
+		
 	}
 
 }
